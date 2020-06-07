@@ -41,7 +41,7 @@ parser.add_argument('--py_vocab', default='./data/py_vocab_sd.txt',
 parser.add_argument('--han_vocab', default='./data/han_vocab_sd.txt', 
 					type=str, required=False)
 
-parser.add_argument('--model_weight', default='./models/py2han_sd_model_epoch8val_acc0.957.pth', 
+parser.add_argument('--model_weight', default='./models/py2han_sd_model_epoch5val_acc0.955.pth', 
 					type=str, required=False)
 parser.add_argument('--test_file', default='./data/ai_shell_test_sd.pinyin', 
 					type=str, required=False)
