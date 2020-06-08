@@ -10,4 +10,4 @@ py37
 /data/ai_shell_*
 /data/*_vocab_sd.txt
 
-/train.json
+/input/train.json

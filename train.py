@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -25,32 +22,23 @@ import numpy as np
 SEED = 666666
 random.seed(SEED)
 torch.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True # to make the training reproducible
+torch.backends.cudnn.deterministic = True  # to make the training reproducible
+
 from model import Model
 
-
-
-
-
 def tokenize_py(text):
+	"""Tokenizes py text from a string into a list of strings
 	"""
-	Tokenizes py text from a string into a list of strings
-	"""
-
 	return text.split(' ')
+
 def tokenize_ch(text):
-	"""
-	Tokenizes English text from a string into a list of strings
+	"""Tokenizes English text from a string into a list of strings
 	"""
 	t = list(text)
+	return t
 
-	return t 
 py_field = Field(tokenize=tokenize_py, init_token='<sos>', eos_token='<eos>', lower=True, batch_first=True)
 han_field = Field(tokenize=tokenize_ch, init_token='<sos>', eos_token='<eos>', lower=True, batch_first=True)
-
-
-
-
 
 train_data = TranslationDataset('./data/ai_shell_train_sd',('.pinyin','.han'),(py_field,han_field))
 valid_data = TranslationDataset('./data/ai_shell_dev_sd',('.pinyin','.han'),(py_field,han_field))
@@ -153,7 +141,7 @@ def evaluate(model, iterator, criterion):
 
 	print('evaluating ....')
 	val_acc = 0
-	pbar = tqdm.tqdm_notebook(total=len(iterator))
+	pbar = tqdm.notebook.tqdm(total=len(iterator))
 	with torch.no_grad():
 
 		for i, batch in enumerate(iterator):
@@ -202,7 +190,7 @@ def train():
 		model.train()
 		epoch_loss = 0
 		epoch_acc = 0
-		bar = tqdm.tqdm_notebook(total=len(train_loader))
+		bar = tqdm.notebook.tqdm(total=len(train_loader))
 		for i, batch in enumerate(train_loader):
 			bar.update(1)
 			src = batch.src

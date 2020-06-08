@@ -40,7 +40,7 @@ parser.add_argument('--py_vocab', default='./data/py_vocab_sd.txt',
 					type=str, required=False)
 parser.add_argument('--han_vocab', default='./data/han_vocab_sd.txt', 
 					type=str, required=False)
-parser.add_argument('--model_weight', default='./models/py2han_sd_model_epoch5val_acc0.955.pth', 
+parser.add_argument('--model_weight', default='./models/py2han_sd_model_epoch3val_acc0.96.pth', 
 					type=str, required=False)
 
 
