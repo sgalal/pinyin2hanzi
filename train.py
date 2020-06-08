@@ -17,6 +17,7 @@ import os
 import time
 
 import numpy as np
+import json
 
 SEED = 666666
 random.seed(SEED)
@@ -44,19 +45,14 @@ valid_data = TranslationDataset('./data/ai_shell_dev_sd',('.pinyin','.han'),(py_
 py_field.build_vocab(train_data, min_freq=2)
 han_field.build_vocab(train_data, min_freq=2)
 
-py_stoi = dict(py_field.vocab.stoi)
-with open('./data/py_vocab_sd.txt','wt') as F:
-	F.write(str(py_stoi))
 
-han_stoi = dict(han_field.vocab.stoi)
+with open('./data/py_vocab_sd.txt','w') as f:
+	py_stoi = dict(py_field.vocab.stoi)
+	json.dump(py_stoi, f)
 
-with open('./data/han_vocab_sd.txt','wt') as F:
-	F.write(str(han_stoi))
-
-
-
-
-
+with open('./data/han_vocab_sd.txt','w') as f:
+	han_stoi = dict(han_field.vocab.stoi)
+	json.dump(han_stoi, f)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

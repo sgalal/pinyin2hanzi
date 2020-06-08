@@ -50,7 +50,8 @@ def main():
 	parser.add_argument('--file', default='./input/train.json', type=str, required=False, help='AI shell transcript')
 	args = parser.parse_args([])
 
-	dataset = list(preprocess(args.file)) + list(make_pycantonese())
+	dataset = list(make_pycantonese())
+	# dataset = list(preprocess(args.file)) + list(make_pycantonese())  # Too large
 	random.Random(42).shuffle(dataset)
 	n_train = int(len(dataset) * 0.8)
 	train_set = dataset[:n_train]
