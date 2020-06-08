@@ -1,17 +1,10 @@
 # pinyin2hanzi
 
-Convert pinyin to hanzi using deep networks.
-
-## TRAINING DATA
-
-As a light-weight example, training data are downloaded from the AI shell speech recognition corpus, 
-found in http://openslr.org/33/. The transcripts rather than the audio data are used. A copy of the transcript file is found in the ./data folder
-
-## MODEL ARCHITECTURE
+拼音轉漢字，using deep networks.
 
 ![](./doc/model.png)
 
-## Run
+## 運行
 
 Install Python 3.7.
 
@@ -28,13 +21,15 @@ Install requirements:
 pip install -r requirements.txt
 ```
 
-Convert ai-shell transcripts from 汉字 to 带声调的拼音 (pinyin with tones)
+Convert ai-shell transcripts from 漢字 to 帶聲調的拼音 (pinyin with tones)
+
+生成的檔案均在 `data` 資料夾下。
 
 ```cmd
-python process_ai_shell_transcript_sd.py
+python process_transcript.py
 ```
 
-Train the model
+訓練模型。這一步亦會生成 `data` 資料夾下的兩個 `.txt` 檔。
 
 ```cmd
 python train.py
@@ -69,6 +64,11 @@ sī fǎ jiàn dìng jī gòu shì dú lì fǎ rén
 bǎo bǎo zhòng wǔ diǎn èr jīn
 
 宝宝重五点二斤
+
+## TRAINING DATA
+
+As a light-weight example, training data are downloaded from the AI shell speech recognition corpus, 
+found in http://openslr.org/33/. The transcripts rather than the audio data are used. A copy of the transcript file is found in the ./data folder
 
 ## Pretrained model
 

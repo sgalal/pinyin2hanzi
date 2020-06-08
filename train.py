@@ -26,54 +26,40 @@ torch.backends.cudnn.deterministic = True  # to make the training reproducible
 
 from model import Model
 
-def tokenize_py(text):
-	"""Tokenizes py text from a string into a list of strings
-	"""
+def tokenize_pinyin(text):
 	return text.split(' ')
 
-def tokenize_ch(text):
-	"""Tokenizes English text from a string into a list of strings
-	"""
-	t = list(text)
-	return t
+def tokenize_hanzi(text):
+	return list(text)
 
-py_field = Field(tokenize=tokenize_py, init_token='<sos>', eos_token='<eos>', lower=True, batch_first=True)
-han_field = Field(tokenize=tokenize_ch, init_token='<sos>', eos_token='<eos>', lower=True, batch_first=True)
+py_field = Field(tokenize=tokenize_pinyin, init_token='<sos>', eos_token='<eos>', batch_first=True)
+han_field = Field(tokenize=tokenize_hanzi, init_token='<sos>', eos_token='<eos>', batch_first=True)
 
-train_data = TranslationDataset('./data/ai_shell_train_sd',('.pinyin','.han'),(py_field,han_field))
-valid_data = TranslationDataset('./data/ai_shell_dev_sd',('.pinyin','.han'),(py_field,han_field))
+train_data = TranslationDataset('./data/ai_shell_train_sd', ('.pinyin', '.han'), (py_field, han_field))
+valid_data = TranslationDataset('./data/ai_shell_dev_sd', ('.pinyin', '.han'), (py_field, han_field))
+
 py_field.build_vocab(train_data, min_freq=2)
 han_field.build_vocab(train_data, min_freq=2)
 
-
 with open('./data/py_vocab_sd.txt','w') as f:
-	py_stoi = dict(py_field.vocab.stoi)
-	json.dump(py_stoi, f)
+	json.dump(dict(py_field.vocab.stoi), f, ensure_ascii=False)
 
 with open('./data/han_vocab_sd.txt','w') as f:
-	han_stoi = dict(han_field.vocab.stoi)
-	json.dump(han_stoi, f)
+	json.dump(dict(han_field.vocab.stoi), f, ensure_ascii=False)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
-
-
-
 batch_size = 32
-train_loader, valid_loader = BucketIterator.splits((train_data, valid_data), batch_size=batch_size,
-	 device=device)
-
-
-
-
+train_loader, valid_loader = BucketIterator.splits((train_data, valid_data), batch_size=batch_size, device=device)
 
 py_vocab_size = len(py_field.vocab.stoi)
 ch_vocab_size = len(han_field.vocab.stoi)
+
 emb_dim = 512
 hidden_dim = 512
 n_layers = 2
-model = Model(py_vocab_size, emb_dim, hidden_dim,ch_vocab_size, n_layers).to(device)
+
+model = Model(py_vocab_size, emb_dim, hidden_dim, ch_vocab_size, n_layers).to(device)
 
 
 
