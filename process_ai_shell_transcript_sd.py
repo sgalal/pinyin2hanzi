@@ -1,57 +1,60 @@
 # -*- coding: utf-8 -*-
 
-import pypinyin
-import numpy as np
 import argparse
+import ToJyutping
+import re
+import numpy as np
 
 np.random.seed(666)
 
+han_regex = re.compile(r'^[\u3006\u3007\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002b73f\U0002b740-\U0002b81f\U0002b820-\U0002ceaf\U0002ceb0-\U0002ebef\U00030000-\U0003134f]+$')
+
+def is_han_string(s):
+	return bool(han_regex.match(s))
+
+def preprocess(file_path):
+	import io, json
+
+	with open(file_path) as f:
+		for x in json.load(f):
+			for line in x.splitlines():
+				for s in re.split('，|。|！|？', line):
+					if is_han_string(s):
+						yield s
+
+def han_to_pinyin(s):
+	return ' '.join(py for _, py in ToJyutping.get_jyutping_list(s))
+
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--file', default='./data/aishell_transcript_v0.8.txt',
+	parser.add_argument('--file', default='./train.json',
 						type=str, required=False, help='AI shell transcript')
 	args = parser.parse_args([])
-	print('args:\n' + args.__repr__())
 
-	file = args.file
-	print('processing ', file)
+	lines = list(preprocess(args.file))
 
-	lines = open(file).read().split('\n')[:-1]
-	lines = [l.split(' ')[1:] for l in lines]
-	all_py = []
-	for l in lines:
-		all_py.append(' '.join([p[0] for p in pypinyin.pinyin(l)]))
+	#idx = np.random.permutation(n)
+	#lines = [''.join(lines[i]) for i in idx]
 
-	n = len(lines)
-	idx = np.random.permutation(n)
-	lines = [''.join(lines[i]) for i in idx]
-	all_py = [all_py[i] for i in idx]
+	n_train = int(len(lines) * 0.8)
 
-	n_train = int(n*0.7)
-	n_dev = int(n*0.9)
-	with open('./data/ai_shell_train_sd.han', 'wt') as F:
-		for l in lines[:n_train]:
-			F.write(l+'\n')
+	with open('./data/ai_shell_train_sd.han', 'w') as f:
+		for line in lines[:n_train]:
+			print(line, file=f)
 
-	with open('./data/ai_shell_train_sd.pinyin', 'wt') as F:
-		for l in all_py[:n_train]:
-			F.write(l+'\n')
-	with open('./data/ai_shell_dev_sd.han', 'wt') as F:
-		for l in lines[n_train:n_dev]:
-			F.write(l+'\n')
+	with open('./data/ai_shell_train_sd.pinyin', 'w') as f:
+		for line in lines[:n_train]:
+			print(han_to_pinyin(line), file=f)
 
-	with open('./data/ai_shell_dev_sd.pinyin', 'wt') as F:
-		for l in all_py[n_train:n_dev]:
-			F.write(l+'\n')
+	with open('./data/ai_shell_dev_sd.han', 'w') as f:
+		for line in lines[n_train:]:
+			print(line, file=f)
 
-	with open('./data/ai_shell_test_sd.han', 'wt') as F:
-		for l in lines[n_dev:]:
-			F.write(l+'\n')
+	with open('./data/ai_shell_dev_sd.pinyin', 'w') as f:
+		for line in lines[n_train:]:
+			print(han_to_pinyin(line), file=f)
 
-	with open('./data/ai_shell_test_sd.pinyin', 'wt') as F:
-		for l in all_py[n_dev:]:
-			F.write(l+'\n')
-	print('{} lines processed,data saved to ./data/ai_shell_'.format(len(lines)))
+	print('%d lines processed,data saved to ./data/ai_shell_' % len(lines))
 
 if __name__ == '__main__':
 	main()

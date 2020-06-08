@@ -20,10 +20,10 @@ def py_to_han(model,s,py_vocab,han_vocab_itos):
 			x.append(py_vocab[_s])
 		else:
 			x.append(py_vocab['<unk>'])
-	
+
 	x = torch.tensor(x).cuda()
 	x= torch.unsqueeze(x,0)
-	
+
 	with torch.no_grad():
 		model.eval()
 		y = model(x)
@@ -34,16 +34,13 @@ def py_to_han(model,s,py_vocab,han_vocab_itos):
 	return ''.join(h[1:-1])
 
 #def main():
-	
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--py_vocab', default='./data/py_vocab_sd.txt', 
 					type=str, required=False)
 parser.add_argument('--han_vocab', default='./data/han_vocab_sd.txt', 
 					type=str, required=False)
-
 parser.add_argument('--model_weight', default='./models/py2han_sd_model_epoch5val_acc0.955.pth', 
-					type=str, required=False)
-parser.add_argument('--test_file', default='./data/ai_shell_test_sd.pinyin', 
 					type=str, required=False)
 
 
@@ -68,12 +65,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = Model(py_vocab_size, emb_dim, hidden_dim,ch_vocab_size, n_layers).to(device)
 model.load_state_dict(sd)
-test_file = args.test_file
-lines = open(test_file).read().split('\n')
-for l in lines:
-	print(l+'\n')
-	ch = py_to_han(model,l,py_vocab,han_vocab_itos)
-	print(ch+'\n')
+
+
+while True:
+	try:
+		l = input('> ')
+		ch = py_to_han(model,l,py_vocab,han_vocab_itos)
+		print(ch)
+	except EOFError:
+		break
 
 # if __name__ == '__main__':
 #	 main()	
