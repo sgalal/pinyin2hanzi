@@ -5,7 +5,7 @@
 __pycache__
 .mypy_cache
 .vscode
-py37
+/venv
 
 /data/ai_shell_*
 /data/*_vocab_sd.txt

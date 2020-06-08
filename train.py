@@ -10,7 +10,6 @@ import torchtext
 from torchtext.datasets import TranslationDataset
 from torchtext.data import Field, BucketIterator
 
-from pdb import set_trace
 import random
 import math
 import os

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import ToJyutping
-import re
+import json
 import random
+import re
+import ToJyutping
 
 # https://ayaka.shn.hk/hanregex/
 han_regex = re.compile(r'^[\u3006\u3007\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002b73f\U0002b740-\U0002b81f\U0002b820-\U0002ceaf\U0002ceb0-\U0002ebef\U00030000-\U0003134f]+$')
@@ -12,8 +13,6 @@ def is_han_string(s):
 	return bool(han_regex.match(s))
 
 def make_news_data(file_path):
-	import io, json
-
 	def han_to_pinyin(s):
 		return ' '.join(py for _, py in ToJyutping.get_jyutping_list(s))
 

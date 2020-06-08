@@ -22,7 +22,6 @@ class ConvBlock(nn.Module):
 			out = self.pool(out)
 		return out
 
-
 class Model(nn.Module):
 	def __init__(self, input_dim, emb_dim, hid_dim, output_dim, n_layers, dropout=0.0):
 		super().__init__()
@@ -38,17 +37,17 @@ class Model(nn.Module):
 		self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout=dropout, bidirectional=True)
 
 		self.conv_dim = hid_dim
-		self.fc1 = nn.Linear(hid_dim*2, hid_dim*2)
+		self.fc1 = nn.Linear(hid_dim * 2, hid_dim * 2)
 		self.relu1 = nn.LeakyReLU()
 		self.bn1 = nn.BatchNorm2d(1)
 
 		factor = 1
-		self.conv1 = ConvBlock(1, 4*factor, (7, 3), padding=(3, 1), pool=True)
-		self.conv2 = ConvBlock(4*factor, 8*factor, (7, 3), padding=(3, 1), pool=True)
-		self.conv3 = ConvBlock(8*factor, 16*factor, (7, 3), padding=(3, 1), pool=True)
-		self.conv4 = ConvBlock(16*factor, 32*factor, (3, 3), padding=(1, 1), pool=False)
+		self.conv1 = ConvBlock(1, 4 * factor, (7, 3), padding=(3, 1), pool=True)
+		self.conv2 = ConvBlock(4 * factor, 8 * factor, (7, 3), padding=(3, 1), pool=True)
+		self.conv3 = ConvBlock(8 * factor, 16 * factor, (7, 3), padding=(3, 1), pool=True)
+		self.conv4 = ConvBlock(16 * factor, 32 * factor, (3, 3), padding=(1, 1), pool=False)
 
-		self.fc2 = nn.Linear(hid_dim*8*factor, output_dim)
+		self.fc2 = nn.Linear(hid_dim * 8 * factor, output_dim)
 		self.drop2 = nn.Dropout(dropout)
 
 		self.log_softmax = nn.LogSoftmax(dim=-1)
