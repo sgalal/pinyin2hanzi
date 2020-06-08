@@ -16,7 +16,6 @@ import math
 import os
 import time
 
-import tqdm
 import numpy as np
 
 SEED = 666666
@@ -141,11 +140,9 @@ def evaluate(model, iterator, criterion):
 
 	print('evaluating ....')
 	val_acc = 0
-	pbar = tqdm.notebook.tqdm(total=len(iterator))
 	with torch.no_grad():
 
 		for i, batch in enumerate(iterator):
-			pbar.update(1)
 			src = batch.src
 			trg = batch.trg
 
@@ -164,7 +161,6 @@ def evaluate(model, iterator, criterion):
 			#output = [batch size * trg sent len - 1, output dim]
 			#trg = [batch size * trg sent len - 1]
 
-			pbar.set_description_str(msg)
 	print('done')	
 	return val_acc
 
@@ -190,9 +186,7 @@ def train():
 		model.train()
 		epoch_loss = 0
 		epoch_acc = 0
-		bar = tqdm.notebook.tqdm(total=len(train_loader))
 		for i, batch in enumerate(train_loader):
-			bar.update(1)
 			src = batch.src
 			trg = batch.trg
 			if trg.shape[0] ==0:
@@ -229,7 +223,6 @@ def train():
 			epoch_acc = (epoch_acc*i + acc)/(i+1)
 
 			msg = 'loss:{:.5},acc:{:.5}'.format(epoch_loss,epoch_acc)
-			bar.set_description_str(msg)
 
 	  #  train_loss = epoch_loss
 		val_acc = evaluate(model, valid_loader, criterion)
