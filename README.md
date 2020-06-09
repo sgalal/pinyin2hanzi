@@ -38,7 +38,7 @@ python train.py
 Do inference
 
 ```cmd
-python inference_sd.py
+python run_inference.py
 ```
 
 ## Examples

@@ -34,37 +34,28 @@ def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--py-vocab', default='./data/py_vocab_sd.txt', type=str, required=False)
 	parser.add_argument('--han-vocab', default='./data/han_vocab_sd.txt', type=str, required=False)
-	parser.add_argument('--model-weight', default='./models/py2han_sd_model_epoch3val_acc0.96.pth', type=str, required=False)
+	parser.add_argument('--model-weight', default='./models/py2han_sd_model_epoch6val_acc0.897.pth', type=str, required=False)
 	return parser.parse_args()
 
-def main():
-	args = get_args()
+args = get_args()
 
-	han_vocab = read_vocab(args.han_vocab)
-	py_vocab = read_vocab(args.py_vocab)
+han_vocab = read_vocab(args.han_vocab)
+py_vocab = read_vocab(args.py_vocab)
 
-	han_vocab_itos = {v: k for k, v in han_vocab.items()}
-	py_vocab_itos = {v: k for k, v in py_vocab.items()}
+han_vocab_itos = {v: k for k, v in han_vocab.items()}
+py_vocab_itos = {v: k for k, v in py_vocab.items()}
 
-	py_vocab_size = len(py_vocab)
-	ch_vocab_size = len(han_vocab)
+py_vocab_size = len(py_vocab)
+ch_vocab_size = len(han_vocab)
 
-	emb_dim = 512
-	hidden_dim = 512
-	n_layers = 2
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+emb_dim = 512
+hidden_dim = 512
+n_layers = 2
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-	sd = torch.load(args.model_weight)
-	model = Model(py_vocab_size, emb_dim, hidden_dim, ch_vocab_size, n_layers).to(device)
-	model.load_state_dict(sd)
+sd = torch.load(args.model_weight)
+model = Model(py_vocab_size, emb_dim, hidden_dim, ch_vocab_size, n_layers).to(device)
+model.load_state_dict(sd)
 
-	while True:
-		try:
-			l = input('> ')
-			ch = py_to_han(model, l, py_vocab, han_vocab_itos)
-			print(ch)
-		except EOFError:
-			break
-
-if __name__ == "__main__":
-	main()
+def convert(s):
+	return py_to_han(model, s, py_vocab, han_vocab_itos)

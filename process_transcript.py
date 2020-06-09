@@ -6,6 +6,8 @@ import random
 import re
 import ToJyutping
 
+from itertools import islice
+
 # https://ayaka.shn.hk/hanregex/
 han_regex = re.compile(r'^[\u3006\u3007\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002b73f\U0002b740-\U0002b81f\U0002b820-\U0002ceaf\U0002ceb0-\U0002ebef\U00030000-\U0003134f]+$')
 
@@ -14,7 +16,7 @@ def is_han_string(s):
 
 def make_news_data(file_path):
 	def han_to_pinyin(s):
-		return ' '.join(py for _, py in ToJyutping.get_jyutping_list(s))
+		return ' '.join(py[:-1] for _, py in ToJyutping.get_jyutping_list(s))  # 去聲調
 
 	with open(file_path) as f:
 		for x in json.load(f):
@@ -33,24 +35,29 @@ def make_pycantonese():
 		words = []
 		jyutpings = []
 		for word, _, jyutping, _ in sent:
+			if word == ',':  # 從逗號分隔整個句子
+				word_ = ''.join(words)
+				if len(word_) > 1:
+					yield word_, ' '.join(jyutpings)
+
+				words = []
+				jyutpings = []
 			if is_han_string(word):
 				jyutping_segments = re.findall(r'[a-z]+\d', jyutping, re.UNICODE)
 				if len(word) == len(jyutping_segments):
 					for word_, jyutping_ in zip(word, jyutping_segments):
 						words.append(word_)
-						jyutpings.append(jyutping_)
-		d[''.join(words), ' '.join(jyutpings)] = None
-
-	for words, jyutpings in d:
-		if words:
-			yield words, jyutpings
+						jyutpings.append(jyutping_[:-1])  # 去聲調
+		word_ = ''.join(words)
+		if len(word_) > 1:
+			yield word_, ' '.join(jyutpings)
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--file', default='./input/train.json', type=str, required=False, help='AI shell transcript')
 	args = parser.parse_args([])
 
-	dataset = list(make_pycantonese())
+	dataset = list(islice(make_news_data(args.file), 400)) + list(make_pycantonese())
 	# dataset = list(make_news_data(args.file)) + list(make_pycantonese())  # Too large
 	random.Random(42).shuffle(dataset)
 	n_train = int(len(dataset) * 0.8)
