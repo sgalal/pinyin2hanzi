@@ -1,79 +1,96 @@
 # pinyin2hanzi
 
-拼音轉漢字，using deep networks.
+基於深度學習的拼音轉漢字
 
-![](./doc/model.png)
+原項目地址 [ranchlai/pinyin2hanzi](https://github.com/ranchlai/pinyin2hanzi)
+
+> 註：用於輸入法，具備音節切分、簡拼功能。本文中的示例使用的是粵語拼音，例如你 (nei) 好 (hou)。
+
+![](doc/model.png)
 
 ## 運行
 
-Install Python 3.7.
-
-Clone repository:
+### 克隆本倉庫
 
 ```cmd
-git clone https://github.com/ranchlai/pinyin2hanzi.git
+git clone https://github.com/sgalal/pinyin2hanzi.git
 cd pinyin2hanzi
 ```
 
-Install requirements:
+### 安裝依賴
+
+需要 Python 3.7 環境。
 
 ```cmd
 pip install -r requirements.txt
 ```
 
-Convert ai-shell transcripts from 漢字 to 帶聲調的拼音 (pinyin with tones)
+### 下載語料並進行預處理
 
-生成的檔案均在 `data` 資料夾下。
+下載語料：
+
+```sh
+wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_yuewiki.txt
+wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_rthk_1.txt
+wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_aishell_transcript.txt
+```
+
+預處理：
 
 ```cmd
 python process_transcript.py
 ```
 
-訓練模型。這一步亦會生成 `data` 資料夾下的兩個 `.txt` 檔。
+註：預處理部分的程式碼因為反覆修改，可能難以閲讀，此處將程式碼功能描述如下：
+
+生成以下四個檔案。
+
+- `data/ai_shell_train_sd.han`
+- `data/ai_shell_train_sd.pinyin`
+- `data/ai_shell_dev_sd.han`
+- `data/ai_shell_dev_sd.pinyin`
+
+其中，以 `.han` 結尾者的格式如下：
+
+```
+x二xxx零xx一xx四xx年xx新xxxx疆xx的xxx房xx地xxx產
+xx機xx器xx人xxx大xx世xxx界xx在xx本xxx屆xx博xxx覽xx會xx後xxxx將xx不xx會xx撤xx館
+xx打xx造x互xxx聯xxx網xx加xx機xx器xx人xxx交xx易xx服xx務xxx大xxx平xx台
+xx各xx地xxx政x府xx便xx紛xx紛xx跟xxx進
+```
+
+以 `.pinyin` 結尾者的格式如下：
+
+```
+jilingjatseininsangoengdikfongdeicaan
+geiheijandaaisaigaaizoibungaaiboklaamkuihauzoengbatkuicitgun
+daazouwulyunmonggaageiheijangaaujikfukmoudaaipingtoi
+gokdeizingfubinfanfanganzeon
+```
+
+### 訓練模型
+
+訓練模型。
+
+這一步亦會生成兩個檔案，供下一步讀取：
+
+- `data/han_vocab_sd.txt`
+- `data/py_vocab_sd.txt`
 
 ```cmd
 python train.py
 ```
 
-Do inference
+### 預測
 
 ```cmd
 python run_inference.py
 ```
 
-## Examples
-
-Results obtained by running inference_sd.py:
-
-néng gòu yíng de bǐ sài zhēn de hěn kāi xīn
-
-能够赢得比赛真的很开心
-
-yě qǔ de le sān xiàn piāo hóng de chéng jī
-
-也取得了三线飘红的成绩
-
-guó yǒu qǐ yè bù bì yě wú xū jiè rù yíng lì xìng qiáng de shāng pǐn fáng kāi fā
-
-国有企业不必也无需介入盈利性强的商品房开发
-
-sī fǎ jiàn dìng jī gòu shì dú lì fǎ rén
-
-司法鉴定机构是独立法人
-
-bǎo bǎo zhòng wǔ diǎn èr jīn
-
-宝宝重五点二斤
-
 ## TRAINING DATA
 
 As a light-weight example, training data are downloaded from the AI shell speech recognition corpus, 
 found in http://openslr.org/33/. The transcripts rather than the audio data are used. A copy of the transcript file is found in the ./data folder
-
-## Pretrained model
-
-Pretrained model using AI-shell transcript file can be downloaded from 
-[gooole drive](https://drive.google.com/open?id=186jnywHwnxqXDBxrbFRpIF7dFAWcwEx_)
 
 ## Reference
 

@@ -6,3 +6,4 @@ ToJyutping>=0.1, <0.2
 ipywidgets
 pycantonese
 cherrypy
+opencc>=1, <2
