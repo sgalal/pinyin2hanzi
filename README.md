@@ -29,11 +29,9 @@ pip install -r requirements.txt
 
 下載語料：
 
-```sh
-wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_yuewiki.txt
-wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_rthk_1.txt
-wget -P input https://raw.githubusercontent.com/sgalal/git-lfs-test/master/data_aishell_transcript.txt
-```
+- `data_aishell_transcript.txt`: <https://drive.google.com/file/d/1-9xQVprG1eg4Pfru_YRfB-dP1qpdQ_YG/view?usp=sharing>
+- `data_rthk_1.txt`: <https://drive.google.com/file/d/1-6gfSDd7VjBKQJ4oS9D2P5FHeSCif7Dj/view?usp=sharing>
+- `data_yuewiki.txt`: <https://drive.google.com/file/d/1--h_JAYl5_caAjUjapQxdfHs-WhjXFy9/view?usp=sharing>
 
 預處理：
 
