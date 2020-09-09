@@ -1,208 +1,108 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import numpy as np
+import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-import torchtext
-from torchtext.data import Field, BucketIterator
-from torchtext.datasets import TranslationDataset
-import os
-import random
+from torch.utils.data import DataLoader
 
+from dataset import SentenceDataset
 from model import Model
 
-def get_args():
-	import argparse
-	parser = argparse.ArgumentParser()
-	# Path
-	parser.add_argument('--data-train-path', default='data/ai_shell_train_sd', type=str)
-	parser.add_argument('--data-dev-path', default='data/ai_shell_dev_sd', type=str)
-	# Model
-	parser.add_argument('--batch-size', default=32, type=int)
-	parser.add_argument('--emb-dim', default=512, type=int)
-	parser.add_argument('--hidden-dim', default=512, type=int)
-	parser.add_argument('--n-layers', default=2, type=int)
-	# Train
-	parser.add_argument('--seed', default=666666, type=int)
-	parser.add_argument('--n-epoch', default=100, type=int)
-	return parser.parse_args()
+# Hyperparameters
 
-args = get_args()
+emb_dim = 512
+hidden_dim = 512
+n_layers = 2
 
-random.seed(args.seed)
-torch.manual_seed(args.seed)
-torch.backends.cudnn.deterministic = True  # Make the training reproducible
+batch_size = 32
+n_epoch = 128
+lr = 0.0008
 
-py_field = Field(tokenize=list, init_token='<sos>', eos_token='<eos>', batch_first=True)
-han_field = Field(tokenize=list, init_token='<sos>', eos_token='<eos>', batch_first=True)
+data_length = 54
 
-train_data = TranslationDataset(args.data_train_path, ('.pinyin', '.han'), (py_field, han_field))
-valid_data = TranslationDataset(args.data_dev_path, ('.pinyin', '.han'), (py_field, han_field))
+model_save_path = 'data/model.pth'
 
-py_field.build_vocab(train_data)
-han_field.build_vocab(train_data)
+# Initialize
 
-with open('./data/py_vocab_sd.txt', 'w') as f:
-	for word in py_field.vocab.stoi:
-		print(word, file=f)
-
-with open('./data/han_vocab_sd.txt', 'w') as f:
-	for word in han_field.vocab.stoi:
-		print(word, file=f)
+torch.backends.cudnn.deterministic = True
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-train_loader, valid_loader = BucketIterator.splits((train_data, valid_data), batch_size=args.batch_size, device=device)
+train_set = SentenceDataset(train=True, root='data', data_length=data_length, device=device)
+test_set = SentenceDataset(train=False, root='data', data_length=data_length, device=device)
 
-py_vocab_size = len(py_field.vocab.stoi)
-ch_vocab_size = len(han_field.vocab.stoi)
+train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
-model = Model(py_vocab_size, args.emb_dim, args.hidden_dim, ch_vocab_size, args.n_layers).to(device)
+x_vocab_size = train_set.tokenizer_x.vocab_size()
+y_vocab_size = train_set.tokenizer_y.vocab_size()
 
+model = Model(x_vocab_size, emb_dim, hidden_dim, y_vocab_size, n_layers).to(device)
+criterion = nn.NLLLoss()
+optimizer = optim.Adam(model.parameters(), lr=lr)
 
-def init_weights(m):
-	for name, param in m.named_parameters():
-		nn.init.uniform_(param.data, -0.08, 0.08)
+# Load states
 
-
-def continue_train():
-	import re
-	res = []
-	for file in os.listdir('models'):
-		match = re.match(f'py2han_sd_model_epoch(\d+)val_acc(\d.\d+)', file)
-		if match:
-			res.append((int(match[1]), float(match[2]), os.path.join('models', file)))
-	if res:
-		res.sort(reverse=True)
-		return res[0]
-
-is_continue_train = continue_train()
-
-if is_continue_train is None:
-	model = model.apply(init_weights)
-	epoch_, val_acc_ = -1, 0.0
+if not os.path.exists(model_save_path):
+	epoch = 0
+	torch.manual_seed(42)
+	torch.cuda.manual_seed(42)
 else:
-	epoch_, val_acc_, path_ = is_continue_train
-	model.load_state_dict(torch.load(path_))
+	state = torch.load(model_save_path)
+	epoch = state['epoch']
+	model.load_state_dict(state['state_dict'])
+	optimizer.load_state_dict(state['optimizer'])
+	torch.set_rng_state(state['rng_state'])
 
+# Use the rand function in torch package so that we can resume the rand state
+randrange = lambda n: int(torch.rand(1).item() * n)
 
-PAD_IDX = han_field.vocab.stoi['<pad>']
-criterion = nn.NLLLoss(ignore_index=PAD_IDX)
-
-
-tok = ['<eos>', '<unk>', '<sos>', '<pad>']
-
-def int2str(ix):
-	res = (han_field.vocab.itos[i] for i in ix)
-	subst_unk = ('?' if re == '<unk>' else re for re in res)
-	return ''.join(re for re in subst_unk if re not in tok)
-
-get_weight = lambda ch: 1 if ch == 'x' else 10
-
-def compare_pre_target(output, target, show_txt=True):
-	pred = torch.argmax(output, -1)
-
-	t_text = int2str(target[0].cpu().numpy())
-	s_text = int2str(pred[0].cpu().numpy())[:len(t_text)]
-
-	correct = sum((s == t) * get_weight(s) for s, t in zip(s_text, t_text))
-	total = sum(get_weight(t) for _, t in zip(s_text, t_text))
-	try:
-		acc = correct / total
-	except ZeroDivisionError:
-		acc = 0
-
-	if show_txt:
-		print('pred:', s_text)
-		print('true:', t_text)
-		print('acc:', acc)
-
-	return acc
-
-
-def evaluate(model, iterator, criterion):
-	model.eval()
-	print('Evaluating...')
-
-	val_acc = 0
-	with torch.no_grad():
-		for i, batch in enumerate(iterator):
-			src = batch.src
-			trg = batch.trg
-
-			output = model(src)
-			acc = compare_pre_target(output.detach(), trg.detach(), i % 64 == 0)
-
-			output = output.contiguous().view(-1, output.shape[-1])
-			trg = trg.contiguous().view(-1)
-
-			val_acc = (val_acc * i + acc) / (i + 1)
-			msg = 'val acc: {:.3}'.format(val_acc)
-
-	print('Done')
-	return val_acc
-
-grad_clip = 1.0
-optimizer = optim.Adam(model.parameters(), lr=3e-4)
-
+# Training process
 
 def train():
-	best_val_acc = val_acc_
-	for epoch in range(epoch_ + 1, args.n_epoch):
-		model.train()
-		epoch_loss = 0
-		epoch_acc = 0
-		for i, batch in enumerate(train_loader):
-			src = batch.src
-			trg = batch.trg
-			if trg.shape[0] == 0:
-				continue
-			optimizer.zero_grad()
+	total_loss = 0
+	for batch_idx, (x, y) in enumerate(train_loader):
+		y_hat = model(x).permute(0, 2, 1)
+		loss = criterion(y_hat, y)
+		total_loss += loss.item()
+		optimizer.zero_grad()
+		loss.backward()
+		optimizer.step()
+	print('Epoch', epoch, 'train loss:', total_loss)
 
-			output = model(src)
+def test():
+	total_loss = 0
+	with torch.no_grad():
+		for x, y in test_loader:
+			y_hat = model(x).permute(0, 2, 1)
+			loss = criterion(y_hat, y)
+			total_loss += loss.item()
+	print('Epoch', epoch, 'test loss:', total_loss)
 
-			show_txt = (i % 1024 == 0)
-			acc = compare_pre_target(output.detach(), trg.detach(), show_txt)
+def visualize():
+	with torch.no_grad():
+		x, y = next(iter(test_loader))
+		y_hat = model(x).permute(0, 2, 1)
+		sample_idx = randrange(y.shape[0])
+	print('Sample input:', train_set.tokenizer_x.itos([x[sample_idx]])[0])
+	print('Expected output:', train_set.tokenizer_y.itos([y_hat[sample_idx].argmax(0)])[0])
+	print('Model output:', train_set.tokenizer_y.itos([y[sample_idx]])[0])
 
-			# trg = [trg sent len, batch size]
-			# output = [trg sent len, batch size, output dim]
+def save():
+	state = {
+		'epoch': epoch,
+		'state_dict': model.state_dict(),
+		'optimizer': optimizer.state_dict(),
+		'rng_state': torch.get_rng_state(),
+	}
+	torch.save(state, model_save_path)
+	print('Saved epoch', epoch)
 
-			output = output[:].view(-1, output.shape[-1])
-			trg = trg[:].view(-1)
-
-			if trg.shape[0] == 0:
-				continue
-
-			# trg = [(trg sent len - 1) * batch size]
-			# output = [(trg sent len - 1) * batch size, output dim]
-			loss = criterion(output, trg)
-
-			loss.backward()
-
-			#torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-
-			optimizer.step()
-
-			epoch_loss = (epoch_loss*i + loss.item())/(i+1)
-			epoch_acc = (epoch_acc*i + acc)/(i+1)
-
-			msg = 'loss:{:.5},acc:{:.5}'.format(epoch_loss, epoch_acc)
-
-		val_acc = evaluate(model, valid_loader, criterion)
-
-		optimizer.param_groups[0]['lr'] *= 0.9
-		print('lr:', optimizer.param_groups[0]['lr'])
-
-		model_path = './models/py2han_sd_model_epoch%02dval_acc%.4f.pth' % (epoch, val_acc)
-
-		if val_acc > best_val_acc:
-			print('Validation acc increased from {} to {}, saving model to {}'.format(best_val_acc, val_acc, model_path))
-			best_val_acc = val_acc
-
-		torch.save(model.state_dict(), model_path)
+# Start training
 
 if __name__ == '__main__':
-	train()
+	while epoch < n_epoch:
+		train()
+		epoch += 1
+		test()
+		visualize()
+		save()

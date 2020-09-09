@@ -1,15 +1,8 @@
-/models/*.pth
-.ipynb_checkpoints
-*.ipynb
-/obsolete
 __pycache__
 .mypy_cache
 .vscode
+
 /venv
 
-/data/ai_shell_*
-/data/*_vocab_sd.txt
-
-/input/*
-# Originally tracked, so I keep it here
-!/input/aishell_transcript_v0.8.txt
+/data/*.txt
+/data/model.pth
