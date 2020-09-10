@@ -58,19 +58,25 @@ randrange = lambda n: int(torch.rand(1).item() * n)
 
 # Utilities
 
-def remove_trailing_pad(lst):
+def trim_tokens(lst):
 	while lst and lst[-1] == train_set.tokenizer_x.TOK_PAD:
 		lst.pop()
-	return lst
+	if lst and lst[-1] == train_set.tokenizer_x.TOK_EOS:
+		lst.pop()
+	if lst and lst[0] == train_set.tokenizer_x.TOK_SOS:
+		lst.pop(0)
 
 def show_sample_result(x, y, y_hat):
 	rand_idx = randrange(y.shape[0])
-	sample_x = remove_trailing_pad(x[rand_idx].tolist())
-	sample_y = remove_trailing_pad(y[rand_idx].tolist())
-	sample_y_hat = remove_trailing_pad(y_hat[rand_idx].argmax(0).tolist())
-	print('Sample input:', train_set.tokenizer_x.itos([sample_x])[0])
-	print('Expected output:', train_set.tokenizer_y.itos([sample_y])[0])
-	print('Model output:', train_set.tokenizer_y.itos([sample_y_hat])[0])
+	sample_x = x[rand_idx].tolist()
+	sample_y = y[rand_idx].tolist()
+	sample_y_hat = y_hat[rand_idx].argmax(0).tolist()
+	trim_tokens(sample_x)
+	trim_tokens(sample_y)
+	trim_tokens(sample_y_hat)
+	print('SI:', train_set.tokenizer_x.itos([sample_x])[0])  # sample input
+	print('EO:', train_set.tokenizer_y.itos([sample_y])[0])  # expected output
+	print('MO:', train_set.tokenizer_y.itos([sample_y_hat])[0])  # model output
 
 # Training process
 
