@@ -56,6 +56,22 @@ else:
 # Use the rand function in torch package so that we can resume the rand state
 randrange = lambda n: int(torch.rand(1).item() * n)
 
+# Utilities
+
+def remove_trailing_pad(lst):
+	while lst and lst[-1] == train_set.tokenizer_x.TOK_PAD:
+		lst.pop()
+	return lst
+
+def show_sample_result(x, y, y_hat):
+	rand_idx = randrange(y.shape[0])
+	sample_x = remove_trailing_pad(x[rand_idx].tolist())
+	sample_y = remove_trailing_pad(y[rand_idx].tolist())
+	sample_y_hat = remove_trailing_pad(y_hat[rand_idx].argmax(0).tolist())
+	print('Sample input:', train_set.tokenizer_x.itos([sample_x])[0])
+	print('Expected output:', train_set.tokenizer_y.itos([sample_y])[0])
+	print('Model output:', train_set.tokenizer_y.itos([sample_y_hat])[0])
+
 # Training process
 
 def train():
@@ -69,11 +85,8 @@ def train():
 		loss.backward()
 		optimizer.step()
 		if current_batch % 100 == 99:
-			rand_idx = randrange(y.shape[0])
 			print('Epoch', current_epoch, 'train batch', current_batch, 'loss:', current_loss)
-			print('Sample input:', train_set.tokenizer_x.itos([x[rand_idx]])[0])
-			print('Expected output:', train_set.tokenizer_y.itos([y_hat[rand_idx].argmax(0)])[0])
-			print('Model output:', train_set.tokenizer_y.itos([y[rand_idx]])[0])
+			show_sample_result(x, y, y_hat)
 	print('Epoch', current_epoch, 'train total loss:', total_loss)
 
 def test():
@@ -83,11 +96,8 @@ def test():
 			y_hat = model(x).permute(0, 2, 1)
 			loss = criterion(y_hat, y)
 			total_loss += loss.item()
-		rand_idx = randrange(y.shape[0])
 		print('Epoch', current_epoch, 'test loss:', total_loss)
-		print('Sample input:', train_set.tokenizer_x.itos([x[rand_idx]])[0])
-		print('Expected output:', train_set.tokenizer_y.itos([y_hat[rand_idx].argmax(0)])[0])
-		print('Model output:', train_set.tokenizer_y.itos([y[rand_idx]])[0])
+		show_sample_result(x, y, y_hat)
 
 def save():
 	state = {
