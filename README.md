@@ -7,8 +7,15 @@
 ## 用法
 
 1. Download `corpus.txt` (one sentence per line)
-2. Run `python preprocess.py`
-3. Run `python train.py`
+1. Shuffle, but group identical keys: `sort -R -o data/corpus_shuffled.txt data/corpus.txt`
+1. Run `python preprocess.py`
+1. Run `python train.py`
+
+## TODO
+
+- [ ] 声母简拼
+- [ ] Predict
+- [ ] Predict server
 
 ## 旧语料（不再使用）
 

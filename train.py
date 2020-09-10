@@ -14,7 +14,7 @@ hidden_dim = 512
 n_layers = 2
 
 batch_size = 32
-n_epoch = 128
+total_epoch = 128
 lr = 0.0008
 
 data_length = 54
@@ -43,12 +43,12 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 # Load states
 
 if not os.path.exists(model_save_path):
-	epoch = 0
+	current_epoch = 0
 	torch.manual_seed(42)
 	torch.cuda.manual_seed(42)
 else:
 	state = torch.load(model_save_path)
-	epoch = state['epoch']
+	current_epoch = state['epoch']
 	model.load_state_dict(state['state_dict'])
 	optimizer.load_state_dict(state['optimizer'])
 	torch.set_rng_state(state['rng_state'])
@@ -67,7 +67,7 @@ def train():
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
-	print('Epoch', epoch, 'train loss:', total_loss)
+	print('Epoch', current_epoch, 'train loss:', total_loss)
 
 def test():
 	total_loss = 0
@@ -76,7 +76,7 @@ def test():
 			y_hat = model(x).permute(0, 2, 1)
 			loss = criterion(y_hat, y)
 			total_loss += loss.item()
-	print('Epoch', epoch, 'test loss:', total_loss)
+	print('Epoch', current_epoch, 'test loss:', total_loss)
 
 def visualize():
 	with torch.no_grad():
@@ -89,20 +89,20 @@ def visualize():
 
 def save():
 	state = {
-		'epoch': epoch,
+		'epoch': current_epoch,
 		'state_dict': model.state_dict(),
 		'optimizer': optimizer.state_dict(),
 		'rng_state': torch.get_rng_state(),
 	}
 	torch.save(state, model_save_path)
-	print('Saved epoch', epoch)
+	print('Saved epoch', current_epoch)
 
 # Start training
 
 if __name__ == '__main__':
-	while epoch < n_epoch:
+	while current_epoch < total_epoch:
 		train()
-		epoch += 1
+		current_epoch += 1
 		test()
 		visualize()
 		save()
