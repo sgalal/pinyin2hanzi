@@ -13,9 +13,9 @@ emb_dim = 512
 hidden_dim = 512
 n_layers = 2
 
-batch_size = 32
-total_epoch = 128
-lr = 0.0008
+batch_size = 480
+total_epoch = 16
+lr = 8e-4
 
 data_length = 54
 
@@ -60,14 +60,17 @@ randrange = lambda n: int(torch.rand(1).item() * n)
 
 def train():
 	total_loss = 0
-	for batch_idx, (x, y) in enumerate(train_loader):
+	for current_batch, (x, y) in enumerate(train_loader):
 		y_hat = model(x).permute(0, 2, 1)
 		loss = criterion(y_hat, y)
-		total_loss += loss.item()
+		current_loss = loss.item()
+		total_loss += current_loss
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
-	print('Epoch', current_epoch, 'train loss:', total_loss)
+		if current_batch % 100 == 99:
+			print('Epoch', current_epoch, 'train batch', current_batch, 'loss:', current_loss)
+	print('Epoch', current_epoch, 'train total loss:', total_loss)
 
 def test():
 	total_loss = 0
@@ -76,16 +79,11 @@ def test():
 			y_hat = model(x).permute(0, 2, 1)
 			loss = criterion(y_hat, y)
 			total_loss += loss.item()
-	print('Epoch', current_epoch, 'test loss:', total_loss)
-
-def visualize():
-	with torch.no_grad():
-		x, y = next(iter(test_loader))
-		y_hat = model(x).permute(0, 2, 1)
-		sample_idx = randrange(y.shape[0])
-	print('Sample input:', train_set.tokenizer_x.itos([x[sample_idx]])[0])
-	print('Expected output:', train_set.tokenizer_y.itos([y_hat[sample_idx].argmax(0)])[0])
-	print('Model output:', train_set.tokenizer_y.itos([y[sample_idx]])[0])
+		rand_idx = randrange(y.shape[0])
+		print('Epoch', current_epoch, 'test loss:', total_loss)
+		print('Sample input:', train_set.tokenizer_x.itos([x[rand_idx]])[0])
+		print('Expected output:', train_set.tokenizer_y.itos([y_hat[rand_idx].argmax(0)])[0])
+		print('Model output:', train_set.tokenizer_y.itos([y[rand_idx]])[0])
 
 def save():
 	state = {
@@ -104,5 +102,4 @@ if __name__ == '__main__':
 		train()
 		current_epoch += 1
 		test()
-		visualize()
 		save()
