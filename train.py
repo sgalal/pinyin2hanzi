@@ -69,7 +69,11 @@ def train():
 		loss.backward()
 		optimizer.step()
 		if current_batch % 100 == 99:
+			rand_idx = randrange(y.shape[0])
 			print('Epoch', current_epoch, 'train batch', current_batch, 'loss:', current_loss)
+			print('Sample input:', train_set.tokenizer_x.itos([x[rand_idx]])[0])
+			print('Expected output:', train_set.tokenizer_y.itos([y_hat[rand_idx].argmax(0)])[0])
+			print('Model output:', train_set.tokenizer_y.itos([y[rand_idx]])[0])
 	print('Epoch', current_epoch, 'train total loss:', total_loss)
 
 def test():
