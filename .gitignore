@@ -4,5 +4,5 @@ __pycache__
 
 /venv
 
-/data/*.txt
-/data/model.pth
+/data/*
+!/data/.placeholder

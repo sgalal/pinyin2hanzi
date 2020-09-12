@@ -4,20 +4,10 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+import config as CONFIG
 from dataset import SentenceDataset
 from model import Model
-
-# Hyperparameters
-
-emb_dim = 512
-hidden_dim = 512
-n_layers = 2
-
-batch_size = 480
-total_epoch = 16
-lr = 8e-4
-
-data_length = 54
+from si import SIHelper
 
 model_save_path = 'data/model.pth'
 
@@ -27,18 +17,21 @@ torch.backends.cudnn.deterministic = True
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-train_set = SentenceDataset(train=True, root='data', data_length=data_length, device=device)
-test_set = SentenceDataset(train=False, root='data', data_length=data_length, device=device)
+train_set = SentenceDataset(train=True, device=device)
+test_set = SentenceDataset(train=False, device=device)
 
-train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
+train_loader = DataLoader(train_set, batch_size=CONFIG.BATCH_SIZE, shuffle=True)
+test_loader = DataLoader(test_set, batch_size=CONFIG.BATCH_SIZE, shuffle=False)
 
-x_vocab_size = train_set.tokenizer_x.vocab_size()
-y_vocab_size = train_set.tokenizer_y.vocab_size()
+six = SIHelper('data/vocab_x.txt')
+siy = SIHelper('data/vocab_y.txt')
 
-model = Model(x_vocab_size, emb_dim, hidden_dim, y_vocab_size, n_layers).to(device)
+x_vocab_size = len(six)
+y_vocab_size = len(siy)
+
+model = Model(x_vocab_size, CONFIG.EMB_DIM, CONFIG.HIDDEN_DIM, y_vocab_size, CONFIG.N_LAYERS).to(device)
 criterion = nn.NLLLoss()
-optimizer = optim.Adam(model.parameters(), lr=lr)
+optimizer = optim.Adam(model.parameters(), lr=CONFIG.LR)
 
 # Load states
 
@@ -58,25 +51,14 @@ randrange = lambda n: int(torch.rand(1).item() * n)
 
 # Utilities
 
-def trim_tokens(lst):
-	while lst and lst[-1] == train_set.tokenizer_x.TOK_PAD:
-		lst.pop()
-	if lst and lst[-1] == train_set.tokenizer_x.TOK_EOS:
-		lst.pop()
-	if lst and lst[0] == train_set.tokenizer_x.TOK_SOS:
-		lst.pop(0)
-
 def show_sample_result(x, y, y_hat):
 	rand_idx = randrange(y.shape[0])
 	sample_x = x[rand_idx].tolist()
 	sample_y = y[rand_idx].tolist()
 	sample_y_hat = y_hat[rand_idx].argmax(0).tolist()
-	trim_tokens(sample_x)
-	trim_tokens(sample_y)
-	trim_tokens(sample_y_hat)
-	print('SI:', train_set.tokenizer_x.itos([sample_x])[0])  # sample input
-	print('EO:', train_set.tokenizer_y.itos([sample_y])[0])  # expected output
-	print('MO:', train_set.tokenizer_y.itos([sample_y_hat])[0])  # model output
+	print('SI:', six.itos(sample_x))  # sample input
+	print('EO:', siy.itos(sample_y))  # expected output
+	print('MO:', siy.itos(sample_y_hat))  # model output
 
 # Training process
 
@@ -118,7 +100,7 @@ def save():
 # Start training
 
 if __name__ == '__main__':
-	while current_epoch < total_epoch:
+	while current_epoch < CONFIG.TOTAL_EPOCH:
 		train()
 		current_epoch += 1
 		test()
