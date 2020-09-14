@@ -18,7 +18,7 @@
 
 将训练集的拼音存储为 `train_x.txt`，训练集的汉字（已与拼音对齐，下同）存储为 `train_y.txt`，测试集的拼音存储为 `test_x.txt`，测试集的汉字存储为 `test_y.txt`。
 
-标注拼音时，每个句子重复四次。其中一次为全拼，三次为简拼。简拼时，随机取句子中 40%（向下取整）的字简拼。三次所取的字不一定相同。如果全拼长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子的全拼和简拼。
+标注拼音时，每个句子重复三次。其中一次为全拼，两次为简拼。简拼时，随机取句子中 20%（向下取整，在代码中以 `simplify_rate` 表示）的字简拼。两次所取的字不一定相同。如果全拼长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子的全拼和简拼。
 
 例如，输入句子为（注：此处有错字，「番工」应为「返工/翻工」，但本项目不做错别字纠正）：
 
@@ -31,12 +31,10 @@
 ```
 ---但--係--因--為---競---爭---大---同---番---工--壓--力---大----想---轉---行
 daanhaijanwaigingzangdaaitungfaangungaatlikdaaisoengzyunhong
----但--係--因為---競---爭---大---同番工壓--力---大想---轉行
-daanhaijanwgingzangdaaitungfgalikdaaiszyunh
----但--係因--為競爭---大---同番---工--壓力大----想---轉---行
-daanhaijwaigzdaaitungfgungaatldsoengzyunhong
-但係--因--為---競爭---大同---番工--壓--力---大----想---轉行
-dhjanwaigingzdaaitfaangaatlikdaaisoengzyunh
+---但--係--因為---競---爭---大---同番工--壓--力---大----想---轉---行
+daanhaijanwgingzangdaaitungfgaatlikdaaisoengzyunhong
+---但--係--因--為---競---爭----大---同番---工--壓力大----想---轉---行
+daanhaijanwaigingzangdaaitungfgungaatldsoengzyunhong
 ```
 
 ### tokenize

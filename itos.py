@@ -1,4 +1,4 @@
-class SIHelper:
+class Itos:
     def __init__(self, path):
         with open(path) as f:
             self.data = ['<unk>', '<sos>', '<eos>', '<pad>'] + [line[0] for line in f]
@@ -17,7 +17,7 @@ class SIHelper:
         if lst and lst[0] == 1:
             lst.pop(0)
 
-    def itos(self, sequence):
+    def __call__(self, sequence):
         self.trim_tokens(sequence)
         return ''.join(self.get_char(i) for i in sequence)
 

@@ -7,9 +7,7 @@ from torch.utils.data import DataLoader
 import config as CONFIG
 from dataset import SentenceDataset
 from model import Model
-from si import SIHelper
-
-model_save_path = 'data/model.pth'
+from itos import Itos
 
 # Initialize
 
@@ -23,11 +21,13 @@ test_set = SentenceDataset(train=False, device=device)
 train_loader = DataLoader(train_set, batch_size=CONFIG.BATCH_SIZE, shuffle=True)
 test_loader = DataLoader(test_set, batch_size=CONFIG.BATCH_SIZE, shuffle=False)
 
-six = SIHelper('data/vocab_x.txt')
-siy = SIHelper('data/vocab_y.txt')
+total_batch = len(train_loader)
 
-x_vocab_size = six.vocab_size()
-y_vocab_size = siy.vocab_size()
+itos_x = Itos('data/vocab_x.txt')
+itos_y = Itos('data/vocab_y.txt')
+
+x_vocab_size = itos_x.vocab_size()
+y_vocab_size = itos_y.vocab_size()
 
 model = Model(x_vocab_size, CONFIG.EMB_DIM, CONFIG.HIDDEN_DIM, y_vocab_size, CONFIG.N_LAYERS).to(device)
 criterion = nn.NLLLoss()
@@ -35,12 +35,12 @@ optimizer = optim.Adam(model.parameters(), lr=CONFIG.LR)
 
 # Load states
 
-if not os.path.exists(model_save_path):
+if not os.path.exists(CONFIG.MODEL_PATH):
 	current_epoch = 0
 	torch.manual_seed(42)
 	torch.cuda.manual_seed(42)
 else:
-	state = torch.load(model_save_path)
+	state = torch.load(CONFIG.MODEL_PATH)
 	current_epoch = state['epoch']
 	model.load_state_dict(state['state_dict'])
 	optimizer.load_state_dict(state['optimizer'])
@@ -56,9 +56,9 @@ def show_sample_result(x, y, y_hat):
 	sample_x = x[rand_idx].tolist()
 	sample_y = y[rand_idx].tolist()
 	sample_y_hat = y_hat[rand_idx].argmax(0).tolist()
-	print('SI:', six.itos(sample_x))  # sample input
-	print('EO:', siy.itos(sample_y))  # expected output
-	print('MO:', siy.itos(sample_y_hat))  # model output
+	print('SI:', itos_x(sample_x))  # sample input
+	print('EO:', itos_y(sample_y))  # expected output
+	print('MO:', itos_y(sample_y_hat))  # model output
 
 # Training process
 
@@ -73,7 +73,7 @@ def train():
 		loss.backward()
 		optimizer.step()
 		if current_batch % 100 == 99:
-			print('Epoch', current_epoch, 'train batch', current_batch, 'loss:', current_loss)
+			print('Epoch', current_epoch, 'train batch %d/%d' % (current_batch, total_batch), 'loss:', current_loss)
 			show_sample_result(x, y, y_hat)
 	print('Epoch', current_epoch, 'train total loss:', total_loss)
 
@@ -94,7 +94,7 @@ def save():
 		'optimizer': optimizer.state_dict(),
 		'rng_state': torch.get_rng_state(),
 	}
-	torch.save(state, model_save_path)
+	torch.save(state, CONFIG.MODEL_PATH)
 	print('Saved epoch', current_epoch)
 
 # Start training
