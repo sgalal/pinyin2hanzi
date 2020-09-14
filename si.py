@@ -25,5 +25,5 @@ class SIHelper:
         self.trim_tokens(sequence)
         return ''.join(self.get_char(i) for i in sequence)
 
-    def __len__(self):
+    def vocab_size(self):
         return len(self.data)

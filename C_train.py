@@ -26,8 +26,8 @@ test_loader = DataLoader(test_set, batch_size=CONFIG.BATCH_SIZE, shuffle=False)
 six = SIHelper('data/vocab_x.txt')
 siy = SIHelper('data/vocab_y.txt')
 
-x_vocab_size = len(six)
-y_vocab_size = len(siy)
+x_vocab_size = six.vocab_size()
+y_vocab_size = siy.vocab_size()
 
 model = Model(x_vocab_size, CONFIG.EMB_DIM, CONFIG.HIDDEN_DIM, y_vocab_size, CONFIG.N_LAYERS).to(device)
 criterion = nn.NLLLoss()

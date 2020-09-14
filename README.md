@@ -8,19 +8,19 @@
 
 ### 数据预处理
 
-数据预处理步骤文件见 `A_preprocess.py`。
+数据预处理步骤文件为 `A_preprocess.py`。
 
 输入为 `data/corpus.txt`，输出为 `train_x.txt`, `train_y.txt`, `test_x.txt`, `test_y.txt`。
 
-输入 `data/corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（数字会在后续步骤中去除）。
+输入 `data/corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（尚未实现数字注音功能，故数字会在后续步骤中去除）。
 
-首先将输入的句子按 8:2 分为训练集和测试集，然后分别标注拼音。如果该句子含有数字，则忽略该句子，继续处理。然后将汉字与拼音对齐。将训练集的拼音存储为 `train_x.txt`，训练集的汉字（已与拼音对齐，下同）存储为 `train_y.txt`，测试集的拼音存储为 `test_x.txt`，测试集的汉字存储为 `test_y.txt`。
+将输入的句子按 8:2 分为训练集和测试集，然后分别标注拼音。如果该句含有数字，则忽略该句，继续处理。然后将汉字与拼音对齐，拼音长度大于 1 时，汉字左侧填充 `-` 符号。
 
-标注拼音时，每个句子重复四次。其中一次为全拼，三次为简拼。简拼时，随机取句子中 40% 的字（向下截断）简拼。三次所取的字不一定相同。
+将训练集的拼音存储为 `train_x.txt`，训练集的汉字（已与拼音对齐，下同）存储为 `train_y.txt`，测试集的拼音存储为 `test_x.txt`，测试集的汉字存储为 `test_y.txt`。
 
-例如，输入句子为（注：此处有错字，「番工」应为「返工/翻工」，但本项目不做错别字纠正)：
+标注拼音时，每个句子重复四次。其中一次为全拼，三次为简拼。简拼时，随机取句子中 40%（向下取整）的字简拼。三次所取的字不一定相同。如果全拼长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子的全拼和简拼。
 
-如果标注拼音的串长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子，不对该句子进行全拼或简拼。
+例如，输入句子为（注：此处有错字，「番工」应为「返工/翻工」，但本项目不做错别字纠正）：
 
 ```
 但係因為競爭大同番工壓力大想轉行
@@ -41,7 +41,7 @@ dhjanwaigingzdaaitfaangaatlikdaaisoengzyunh
 
 ### tokenize
 
-数据预处理步骤文件见 `B_tokenize.py`。
+数据预处理步骤文件为 `B_tokenize.py`。
 
 输入为 `train_x.txt`, `test_x.txt`，输出为 `vocab_x.txt`, `tokens_train_x.pth`, `tokens_test_x.pth`。
 
@@ -50,6 +50,14 @@ dhjanwaigingzdaaitfaangaatlikdaaisoengzyunh
 tokenize 时使用 char-level tokenization，即根据训练集的单字建立词表，将训练集和测试集的单字映射为正整数。
 
 词表中 0 表示 `<unk>`，1 表示 `<sos>`，2 表示 `<eos>`，3 表示 `<pad>`，数据集的单字从 4 开始。
+
+`vocab_x.txt` 及 `vocab_y.txt` 每行是一个字符，第一行代表第四个 token，第二行代表第五个 token，依此类推。
+
+`tokens_train_x.pth`, `tokens_test_x.pth`, `tokens_train_y.pth`, `tokens_test_y.pth` 都是二维的 tensor，其中低维的长度为 54（`PAD_TO` 的值）。
+
+### 训练
+
+数据预处理步骤文件为 `C_train.py`。
 
 ## TODO
 
