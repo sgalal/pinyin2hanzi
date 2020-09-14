@@ -59,12 +59,18 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 
 数据预处理步骤文件为 `C_train.py`。
 
+### 预测
+
+数据预处理步骤文件为 `D_predict.py`。
+
 ## TODO
 
 - [x] 声母简拼
-- [ ] 模型训练
-- [ ] 预测
+- [x] 模型训练
+- [x] 预测
 - [ ] 将预测功能封装为 Web API
+- [ ] 拆分 `data` 目录
+- [ ] 将语料存入 git lfs
 
 ## 旧语料（不再使用）
 

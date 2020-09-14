@@ -1,10 +1,6 @@
-import os
-
-here = os.path.dirname(os.path.abspath(__file__))
-
 class SIHelper:
     def __init__(self, path):
-        with open(os.path.join(here, path)) as f:
+        with open(path) as f:
             self.data = ['<unk>', '<sos>', '<eos>', '<pad>'] + [line[0] for line in f]
 
     def get_char(self, i):
