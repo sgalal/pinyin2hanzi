@@ -54,28 +54,27 @@ def process_jyutping_list(xs):
 	res.append((xxs, yys))
 
 	# Simplified romanisation
-	for _ in range(2):
-		should_simplify = random.sample(range(len(xs)), int(len(xs) * simplify_rate))
+	should_simplify = random.sample(range(len(xs)), int(len(xs) * simplify_rate))
 
-		xxs = []
-		yys = []
-		for i, (y, x) in enumerate(xs):
-			if x is None:
-				a = y.lower()
+	xxs = []
+	yys = []
+	for i, (y, x) in enumerate(xs):
+		if x is None:
+			a = y.lower()
+			b = y
+		else:
+			if i in should_simplify:
+				a = x[0]
 				b = y
 			else:
-				if i in should_simplify:
-					a = x[0]
-					b = y
-				else:
-					a = remove_tones_and_spaces(x)
-					b = '-' * (len(a) - 1) + y
-			xxs.append(a)
-			yys.append(b)
-		xxs = ''.join(xxs)
-		yys = ''.join(yys)
+				a = remove_tones_and_spaces(x)
+				b = '-' * (len(a) - 1) + y
+		xxs.append(a)
+		yys.append(b)
+	xxs = ''.join(xxs)
+	yys = ''.join(yys)
 
-		res.append((xxs, yys))
+	res.append((xxs, yys))
 
 	return res
 
