@@ -54,6 +54,7 @@ def process_jyutping_list(xs):
 	res.append((xxs, yys))
 
 	# Simplified romanisation
+	'''
 	should_simplify = random.sample(range(len(xs)), int(len(xs) * simplify_rate))
 
 	xxs = []
@@ -75,6 +76,7 @@ def process_jyutping_list(xs):
 	yys = ''.join(yys)
 
 	res.append((xxs, yys))
+	'''
 
 	return res
 

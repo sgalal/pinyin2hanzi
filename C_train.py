@@ -40,7 +40,7 @@ if not os.path.exists(CONFIG.MODEL_PATH):
 	torch.manual_seed(42)
 	torch.cuda.manual_seed(42)
 else:
-	state = torch.load(CONFIG.MODEL_PATH)
+	state = torch.load(CONFIG.MODEL_PATH, map_location='cpu')
 	current_epoch = state['epoch']
 	model.load_state_dict(state['state_dict'])
 	optimizer.load_state_dict(state['optimizer'])

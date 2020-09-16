@@ -6,6 +6,19 @@
 
 ## 用法
 
+Install Python 3.8 (older versions may also work).
+
+Edit configurations in `config.py`, then run:
+
+```sh
+python A_preprocess.py
+python B_tokenize.py
+python C_train.py
+python D_predict.py
+```
+
+## 原理
+
 ### 数据预处理
 
 数据预处理步骤文件为 `A_preprocess.py`。
@@ -20,19 +33,19 @@
 
 标注拼音时，每个句子重复两次。其中全拼一次，简拼一次。简拼时，随机取句子中 20%（向下取整，在代码中以 `simplify_rate` 表示）的字简拼。如果全拼长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子的全拼和简拼。
 
-例如，输入句子为（注：此处有错字，「番工」应为「返工/翻工」，但本项目不做错别字纠正）：
+例如，输入句子为：
 
 ```
-但係因為競爭大同番工壓力大想轉行
+對方又驚你騎牛搵馬
 ```
 
 输出为（实际位于不同文件）：
 
 ```
----但--係--因--為---競---爭---大---同---番---工--壓--力---大----想---轉---行
-daanhaijanwaigingzangdaaitungfaangungaatlikdaaisoengzyunhong
----但--係--因--為---競---爭----大---同番---工--壓力大----想---轉---行
-daanhaijanwaigingzangdaaitungfgungaatldsoengzyunhong
+deoifongjaugingneikengauwanmaa
+---對---方--又---驚--你-騎---牛--搵--馬
+dfongjaugingneikengauwanmaa
+對---方--又---驚--你-騎---牛--搵--馬
 ```
 
 ### tokenize
