@@ -6,8 +6,9 @@ from torch.utils.data import DataLoader
 
 import config as CONFIG
 from dataset import SentenceDataset
-from model import Model
 from itos import Itos
+from model import Model
+from utils import init_weights, randrange
 
 # Initialize
 
@@ -39,15 +40,13 @@ if not os.path.exists(CONFIG.MODEL_PATH):
 	current_epoch = 0
 	torch.manual_seed(42)
 	torch.cuda.manual_seed(42)
+	model.apply(init_weights)
 else:
 	state = torch.load(CONFIG.MODEL_PATH, map_location='cpu')
 	current_epoch = state['epoch']
 	model.load_state_dict(state['state_dict'])
 	optimizer.load_state_dict(state['optimizer'])
 	torch.set_rng_state(state['rng_state'])
-
-# Use the rand function in torch package so that we can resume the rand state
-randrange = lambda n: int(torch.rand(1).item() * n)
 
 # Utilities
 
@@ -72,7 +71,7 @@ def train():
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
-		if current_batch % 10 == 9:
+		if current_batch % 10 == 0:
 			print('Epoch', current_epoch, 'batch %d/%d:' % (current_batch, total_batch), 'loss', current_loss)
 			show_sample_result(x, y, y_hat)
 	print('Epoch', current_epoch, 'train total loss:', total_loss)

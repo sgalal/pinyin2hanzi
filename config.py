@@ -6,6 +6,6 @@ N_LAYERS = 2
 
 BATCH_SIZE = 400
 TOTAL_EPOCH = 16
-LR = 8e-4  # learning rate
+LR = 1e-3  # learning rate
 
 MODEL_PATH = 'data/model.pth'
