@@ -23,9 +23,9 @@ python D_predict.py
 
 数据预处理步骤文件为 `A_preprocess.py`。
 
-输入为 `data/corpus.txt`，输出为 `train_x.txt`, `train_y.txt`, `test_x.txt`, `test_y.txt`。
+输入为 `corpus.txt`，输出为 `train_x.txt`, `train_y.txt`, `test_x.txt`, `test_y.txt`（注：所有输入输出均在 `data` 目录下，下同）。
 
-输入 `data/corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（尚未实现数字注音功能，故数字会在后续步骤中去除）。
+输入 `corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（尚未实现数字注音功能，故数字会在后续步骤中去除）。
 
 将输入的句子按 8:2 分为训练集和测试集，然后分别标注拼音。如果该句含有数字，则忽略该句，继续处理。然后将汉字与拼音对齐，拼音长度大于 1 时，汉字左侧填充 `-` 符号。
 
@@ -74,18 +74,18 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 
 ## TODO
 
-- [x] 声母简拼
+- [ ] 声母简拼
 - [x] 模型训练
 - [x] 预测
 - [ ] 将预测功能封装为 Web API
 - [ ] 拆分 `data` 目录
 - [ ] 将语料存入 git lfs
 
-## 旧语料（不再使用）
+## Q&A
 
-- `data_aishell_transcript.txt`: <https://drive.google.com/file/d/1-9xQVprG1eg4Pfru_YRfB-dP1qpdQ_YG/view?usp=sharing>
-- `data_rthk_1.txt`: <https://drive.google.com/file/d/1-6gfSDd7VjBKQJ4oS9D2P5FHeSCif7Dj/view?usp=sharing>
-- `data_yuewiki.txt`: <https://drive.google.com/file/d/1--h_JAYl5_caAjUjapQxdfHs-WhjXFy9/view?usp=sharing>
+### 如何适配普通话拼音？
+
+拼音是程序自动标注的。要适配普通话拼音，修改 `A_preprocess.py`，将其中标注粤语拼音的代码改为普通话即可。
 
 ## 保留了一部分原项目的说明
 

@@ -3,8 +3,6 @@ import ToJyutping
 
 import config as CONFIG
 
-simplify_rate = 0.2
-
 random.seed(42)
 
 def has_number(s):
@@ -52,31 +50,6 @@ def process_jyutping_list(xs):
 		return res
 
 	res.append((xxs, yys))
-
-	# Simplified romanisation
-	'''
-	should_simplify = random.sample(range(len(xs)), int(len(xs) * simplify_rate))
-
-	xxs = []
-	yys = []
-	for i, (y, x) in enumerate(xs):
-		if x is None:
-			a = y.lower()
-			b = y
-		else:
-			if i in should_simplify:
-				a = x[0]
-				b = y
-			else:
-				a = remove_tones_and_spaces(x)
-				b = '-' * (len(a) - 1) + y
-		xxs.append(a)
-		yys.append(b)
-	xxs = ''.join(xxs)
-	yys = ''.join(yys)
-
-	res.append((xxs, yys))
-	'''
 
 	return res
 

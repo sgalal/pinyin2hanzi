@@ -4,7 +4,7 @@ EMB_DIM = 512
 HIDDEN_DIM = 512
 N_LAYERS = 2
 
-BATCH_SIZE = 40
+BATCH_SIZE = 400
 TOTAL_EPOCH = 16
 LR = 8e-4  # learning rate
 

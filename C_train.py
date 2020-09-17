@@ -65,15 +65,15 @@ def show_sample_result(x, y, y_hat):
 def train():
 	total_loss = 0
 	for current_batch, (x, y) in enumerate(train_loader):
-		y_hat = model(x).permute(0, 2, 1)
+		y_hat = model(x)
 		loss = criterion(y_hat, y)
 		current_loss = loss.item()
 		total_loss += current_loss
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
-		if current_batch % 100 == 99:
-			print('Epoch', current_epoch, 'train batch %d/%d' % (current_batch, total_batch), 'loss:', current_loss)
+		if current_batch % 10 == 9:
+			print('Epoch', current_epoch, 'batch %d/%d:' % (current_batch, total_batch), 'loss', current_loss)
 			show_sample_result(x, y, y_hat)
 	print('Epoch', current_epoch, 'train total loss:', total_loss)
 
@@ -81,7 +81,7 @@ def test():
 	total_loss = 0
 	with torch.no_grad():
 		for x, y in test_loader:
-			y_hat = model(x).permute(0, 2, 1)
+			y_hat = model(x)
 			loss = criterion(y_hat, y)
 			total_loss += loss.item()
 		print('Epoch', current_epoch, 'test loss:', total_loss)

@@ -70,5 +70,5 @@ class Model(nn.Module):
 		out = self.fc2(out)
 
 		out = self.log_softmax(out)
-
+		out = out.permute(0, 2, 1)
 		return out
