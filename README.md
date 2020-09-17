@@ -1,96 +1,91 @@
 # pinyin2hanzi
 
-基於深度學習的拼音轉漢字
+基于深度学习的拼音转汉字。原项目地址 [ranchlai/pinyin2hanzi](https://github.com/ranchlai/pinyin2hanzi)。
 
-原項目地址 [ranchlai/pinyin2hanzi](https://github.com/ranchlai/pinyin2hanzi)
+示例中使用的是粤语拼音，对普通话拼音也同样适用。
 
-> 註：用於輸入法，具備音節切分、簡拼功能。本文中的示例使用的是粵語拼音，例如你 (nei) 好 (hou)。
+## 用法
 
-![](doc/model.png)
+Install Python 3.8 (older versions may also work).
 
-## 運行
+Edit configurations in `config.py`, then run:
 
-### 克隆本倉庫
-
-```cmd
-git clone https://github.com/sgalal/pinyin2hanzi.git
-cd pinyin2hanzi
+```sh
+python A_preprocess.py
+python B_tokenize.py
+python C_train.py
+python D_predict.py
 ```
 
-### 安裝依賴
+## 原理
 
-需要 Python 3.7 環境。
+### 数据预处理
 
-```cmd
-pip install -r requirements.txt
-```
+数据预处理步骤文件为 `A_preprocess.py`。
 
-### 下載語料並進行預處理
+输入为 `corpus.txt`，输出为 `train_x.txt`, `train_y.txt`, `test_x.txt`, `test_y.txt`（注：所有输入输出均在 `data` 目录下，下同）。
 
-下載語料：
+输入 `corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（尚未实现数字注音功能，所以数字会在后续步骤中去除）。其中，汉字既可以是繁体字，也可以是简体字，但不要混合。
 
-- `data_aishell_transcript.txt`: <https://drive.google.com/file/d/1-9xQVprG1eg4Pfru_YRfB-dP1qpdQ_YG/view?usp=sharing>
-- `data_rthk_1.txt`: <https://drive.google.com/file/d/1-6gfSDd7VjBKQJ4oS9D2P5FHeSCif7Dj/view?usp=sharing>
-- `data_yuewiki.txt`: <https://drive.google.com/file/d/1--h_JAYl5_caAjUjapQxdfHs-WhjXFy9/view?usp=sharing>
+将输入的句子按 8:2 分为训练集和测试集，然后分别标注拼音。如果该句含有数字，则忽略该句，继续处理。然后将汉字与拼音对齐，拼音长度大于 1 时，汉字左侧填充 `-` 符号。
 
-預處理：
+将训练集的拼音存储为 `train_x.txt`，训练集的汉字（已与拼音对齐，下同）存储为 `train_y.txt`，测试集的拼音存储为 `test_x.txt`，测试集的汉字存储为 `test_y.txt`。
 
-```cmd
-python process_transcript.py
-```
+标注拼音时，如果全拼音长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子。
 
-註：預處理部分的程式碼因為反覆修改，可能難以閲讀，此處將程式碼功能描述如下：
-
-生成以下四個檔案。
-
-- `data/ai_shell_train_sd.han`
-- `data/ai_shell_train_sd.pinyin`
-- `data/ai_shell_dev_sd.han`
-- `data/ai_shell_dev_sd.pinyin`
-
-其中，以 `.han` 結尾者的格式如下：
+例如，输入句子为：
 
 ```
-x二xxx零xx一xx四xx年xx新xxxx疆xx的xxx房xx地xxx產
-xx機xx器xx人xxx大xx世xxx界xx在xx本xxx屆xx博xxx覽xx會xx後xxxx將xx不xx會xx撤xx館
-xx打xx造x互xxx聯xxx網xx加xx機xx器xx人xxx交xx易xx服xx務xxx大xxx平xx台
-xx各xx地xxx政x府xx便xx紛xx紛xx跟xxx進
+對方又驚你騎牛搵馬
 ```
 
-以 `.pinyin` 結尾者的格式如下：
+输出为（实际上拼音和汉字不在同一个文件）：
 
 ```
-jilingjatseininsangoengdikfongdeicaan
-geiheijandaaisaigaaizoibungaaiboklaamkuihauzoengbatkuicitgun
-daazouwulyunmonggaageiheijangaaujikfukmoudaaipingtoi
-gokdeizingfubinfanfanganzeon
+deoifongjaugingneikengauwanmaa
+---對---方--又---驚--你-騎---牛--搵--馬
 ```
 
-### 訓練模型
+### tokenize
 
-訓練模型。
+数据预处理步骤文件为 `B_tokenize.py`。
 
-這一步亦會生成兩個檔案，供下一步讀取：
+输入为 `train_x.txt`, `test_x.txt`，输出为 `vocab_x.txt`, `tokens_train_x.pth`, `tokens_test_x.pth`。
 
-- `data/han_vocab_sd.txt`
-- `data/py_vocab_sd.txt`
+输入为 `train_y.txt`, `test_y.txt`，输出为 `vocab_y.txt`, `tokens_train_y.pth`, `tokens_test_y.pth`。
 
-```cmd
-python train.py
-```
+tokenize 时使用 char-level tokenization，即根据训练集的单字建立词表，将训练集和测试集的单字映射为正整数。
 
-### 預測
+词表中 0 表示 `<unk>`，1 表示 `<sos>`，2 表示 `<eos>`，3 表示 `<pad>`，数据集的单字从 4 开始。
 
-```cmd
-python run_inference.py
-```
+`vocab_x.txt` 及 `vocab_y.txt` 每行是一个字符，第一行代表第四个 token，第二行代表第五个 token，依此类推。
 
-## TRAINING DATA
+`tokens_train_x.pth`, `tokens_test_x.pth`, `tokens_train_y.pth`, `tokens_test_y.pth` 都是二维的 tensor，其中低维的长度为 54（`PAD_TO` 的值）。
 
-As a light-weight example, training data are downloaded from the AI shell speech recognition corpus, 
-found in http://openslr.org/33/. The transcripts rather than the audio data are used. A copy of the transcript file is found in the ./data folder
+### 训练
 
-## Reference
+数据预处理步骤文件为 `C_train.py`。
+
+### 预测
+
+数据预处理步骤文件为 `D_predict.py`。
+
+## TODO
+
+- [ ] 声母简拼
+- [x] 模型训练
+- [x] 预测
+- [ ] 将预测功能封装为 Web API
+- [ ] 拆分 `data` 目录
+- [ ] 将语料存入 git lfs
+
+## Q&A
+
+### 如何适配普通话拼音？
+
+拼音是程序自动标注的。要适配普通话拼音，修改 `A_preprocess.py`，将其中标注粤语拼音的代码改为普通话即可。
+
+## 保留了一部分原项目的说明
 
 Some of the code borrowed from https://github.com/bentrevett/pytorch-seq2seq
 
