@@ -72,12 +72,24 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 
 ## TODO
 
+文件：
+
+- [ ] `A_preprocess.py`
+- [ ] `B_tokenize.py`
+- [ ] `C_train.py`
+- [x] `D_predict.py`
+- [x] `dataset.py`
+- [x] `itos.py`
+- [x] `model.py`
+- [x] `stoi.py`
+- [ ] `utils.py`
+
+功能：
+
 - [ ] 声母简拼
 - [x] 模型训练
 - [x] 预测
 - [ ] 将预测功能封装为 Web API
-- [ ] 拆分 `data` 目录
-- [ ] 将语料存入 git lfs
 
 ## Q&A
 

@@ -20,10 +20,10 @@ model.load_state_dict(state['state_dict'])
 
 try:
 	while True:
-		x = input('> ')
-		x = stoi_x(x)
-		x = torch.tensor([x])
-		y = model(x).permute(0, 2, 1)
+		s = input('> ')
+		s = stoi_x(s)
+		x = torch.tensor([s])
+		y = model(x)
 		y = y[0].argmax(0).tolist()
 		y = itos_y(y)
 		print(y)
