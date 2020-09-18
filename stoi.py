@@ -1,3 +1,5 @@
+from itertools import repeat
+
 import config as CONFIG
 
 class Stoi:
@@ -15,8 +17,8 @@ class Stoi:
 		def inner():
 			yield self.TOK_SOS
 			yield from (self.data.get(ord(c), self.TOK_UNK) for c in s)
-			yield from (self.TOK_PAD for _ in range(CONFIG.PAD_TO - 2 - len(s)))
 			yield self.TOK_EOS
+			yield from repeat(self.TOK_PAD, CONFIG.PAD_TO - 2 - len(s))
 		return list(inner())
 
 	def vocab_size(self):
