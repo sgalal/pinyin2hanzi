@@ -1,25 +1,8 @@
+from itertools import repeat
 import torch
 
 import config as CONFIG
-
-class UniqueIDGen:
-	def __init__(self, start=0):
-		self.i = start
-		self.d = {}
-		self.l = []
-
-	def get_or_create(self, e):
-		try:
-			return self.d[e]
-		except KeyError:
-			i = self.i
-			self.d[e] = i
-			self.l.append(e)
-			self.i += 1
-			return i
-
-	def get(self, e, default=None):
-		return self.d.get(e, default)
+from uniqueid import UniqueID
 
 class CharLevelTokenizer:
 	'''Perform character level tokenization.'''
@@ -29,68 +12,41 @@ class CharLevelTokenizer:
 	TOK_PAD = 3
 
 	def __init__(self):
-		self.uig = UniqueIDGen(start=4)
+		self.uniqueid = UniqueID(start=4)
 
 	def build_vocab(self, texts):
-		xss = []
-		for line in texts:
-			xs = [self.TOK_SOS]
-			for c in line:
-				cp = ord(c)
-				i = self.uig.get_or_create(cp)
-				xs.append(i)
-			xs.append(self.TOK_EOS)
-			xs.extend((CONFIG.PAD_TO - len(xs)) * [self.TOK_PAD])
-			xss.append(xs)
-		return xss
+		def inner(s):
+			yield self.TOK_SOS
+			yield from (self.uniqueid.get_or_create(ord(c)) for c in s)
+			yield self.TOK_EOS
+			yield from repeat(self.TOK_PAD, CONFIG.PAD_TO - 2 - len(s))
+		return [list(inner(line)) for line in texts]
 
 	def get_vocab(self, texts):
-		xss = []
-		for line in texts:
-			xs = [self.TOK_SOS]
-			for c in line:
-				cp = ord(c)
-				i = self.uig.get(cp, self.TOK_UNK)
-				xs.append(i)
-			xs.append(self.TOK_EOS)
-			xs.extend((CONFIG.PAD_TO - len(xs)) * [self.TOK_PAD])
-			xss.append(xs)
-		return xss
+		def inner(s):
+			yield self.TOK_SOS
+			yield from (self.uniqueid.get(ord(c), self.TOK_UNK) for c in s)
+			yield self.TOK_EOS
+			yield from repeat(self.TOK_PAD, CONFIG.PAD_TO - 2 - len(s))
+		return [list(inner(line)) for line in texts]
 
-	def get_vocab_list(self):
-		return self.uig.l
-
-def build_vocab_y():
-	clt = CharLevelTokenizer()
-	with open('data/train_y.txt') as f:
-		ys = (line.rstrip('\n') for line in f)
-		tokens_train_y = clt.build_vocab(ys)
-	torch.save(torch.tensor(tokens_train_y), 'data/tokens_train_y.pth')
-
-	with open('data/test_y.txt') as f:
-		ys = (line.rstrip('\n') for line in f)
-		tokens_test_y = clt.get_vocab(ys)
-	torch.save(torch.tensor(tokens_test_y), 'data/tokens_test_y.pth')
-
-	with open('data/vocab_y.txt', 'w') as f:
-		for line in clt.get_vocab_list():
+	def save_vocab_list(self, f):
+		for line in self.uniqueid.i2s:
 			print(chr(line), file=f)
 
-def build_vocab_x():
-	clt = CharLevelTokenizer()
-	with open('data/train_x.txt') as f:
-		xs = (line.rstrip('\n') for line in f)
-		tokens_train_x = clt.build_vocab(xs)
-	torch.save(torch.tensor(tokens_train_x), 'data/tokens_train_x.pth')
+def build_vocab(in_a, in_b, out_a, out_b, vocab_file):
+	tokenizer = CharLevelTokenizer()
 
-	with open('data/test_x.txt') as f:
-		xs = (line.rstrip('\n') for line in f)
-		tokens_test_x = clt.get_vocab(xs)
-	torch.save(torch.tensor(tokens_test_x), 'data/tokens_test_x.pth')
+	with open(in_a) as f:
+		tokens_train = tokenizer.build_vocab(line.rstrip('\n') for line in f)
+		torch.save(torch.tensor(tokens_train), out_a)
 
-	with open('data/vocab_x.txt', 'w') as f:
-		for line in clt.get_vocab_list():
-			print(chr(line), file=f)
+	with open(in_b) as f:
+		tokens_test = tokenizer.get_vocab(line.rstrip('\n') for line in f)
+		torch.save(torch.tensor(tokens_test), out_b)
 
-build_vocab_y()
-build_vocab_x()
+	with open(vocab_file, 'w') as f:
+		tokenizer.save_vocab_list(f)
+
+build_vocab('data/train_x.txt', 'data/test_x.txt', 'data/tokens_train_x.pth', 'data/tokens_test_x.pth', 'data/vocab_x.txt')
+build_vocab('data/train_y.txt', 'data/test_y.txt', 'data/tokens_train_y.pth', 'data/tokens_test_y.pth', 'data/vocab_y.txt')
