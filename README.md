@@ -83,7 +83,7 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 - [x] `model.py`
 - [x] `stoi.py`
 - [x] `uniqueid.py`
-- [ ] `utils.py`
+- [x] `utils.py`
 
 功能：
 
