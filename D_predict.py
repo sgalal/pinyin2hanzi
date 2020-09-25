@@ -14,7 +14,7 @@ itos_y = Itos('data/vocab_y.txt')
 x_vocab_size = stoi_x.vocab_size()
 y_vocab_size = itos_y.vocab_size()
 
-model = Model(x_vocab_size, CONFIG.EMB_SIZE, CONFIG.HIDDEN_SIZE, y_vocab_size, CONFIG.NUM_LAYERS)
+model = Model(x_vocab_size, CONFIG.EMB_SIZE, CONFIG.HIDDEN_SIZE, y_vocab_size, CONFIG.NUM_LAYERS, CONFIG.DROPOUT)
 state = torch.load(CONFIG.MODEL_PATH)
 model.load_state_dict(state['state_dict'])
 

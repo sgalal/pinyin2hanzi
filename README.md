@@ -80,7 +80,7 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 - [x] `D_predict.py`
 - [x] `dataset.py`
 - [x] `itos.py`
-- [x] `model.py`
+- [ ] `model.py`
 - [x] `stoi.py`
 - [x] `uniqueid.py`
 - [x] `utils.py`
