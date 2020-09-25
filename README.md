@@ -8,7 +8,7 @@
 
 Install Python 3.8 (older versions may also work).
 
-Edit configurations in `config.py`, then run:
+Copy `config.template.py` to`config.py`. Edit the configurations. Then run:
 
 ```sh
 python A_preprocess.py
