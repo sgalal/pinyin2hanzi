@@ -1,3 +1,4 @@
+import logging
 import os
 import torch
 import torch.nn as nn
@@ -11,6 +12,12 @@ from model import Model
 from trainutils import save, test, train
 
 # Initialize
+
+logging.basicConfig(
+	level=logging.DEBUG,
+	format='%(asctime)s %(levelname)s %(message)s',
+	datefmt='%H:%M:%S'
+)
 
 torch.backends.cudnn.deterministic = True
 

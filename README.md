@@ -90,6 +90,7 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 - [ ] 声母简拼
 - [ ] 模型训练
    - [x] basic training process
+   - [x] logging
    - [ ] scheduler
    - [ ] initialize weights
 - [x] 预测
