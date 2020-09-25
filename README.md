@@ -88,7 +88,10 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 功能：
 
 - [ ] 声母简拼
-- [x] 模型训练
+- [ ] 模型训练
+   - [x] basic training process
+   - [ ] scheduler
+   - [ ] initialize weights
 - [x] 预测
 - [ ] 将预测功能封装为 Web API
 

@@ -7,6 +7,6 @@ DROPOUT = 0.1
 
 BATCH_SIZE = 400
 TOTAL_EPOCH = 16
-LR = 1e-3  # learning rate
+LEARNING_RATE = 1e-3
 
 MODEL_PATH = 'data/model.pth'
