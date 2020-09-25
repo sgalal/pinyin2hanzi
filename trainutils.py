@@ -22,8 +22,6 @@ def show_sample_result(x, y, y_hat, itos_x, itos_y):
 
 def train(train_loader, model, criterion, optimizer, total_batch, current_epoch, itos_x, itos_y):
 	total_loss = 0
-	sample_count = 0
-	correct_count = 0
 	for current_batch, (x, y) in enumerate(train_loader):
 		y_hat = model(x)
 		loss = criterion(y_hat, y)
@@ -32,12 +30,12 @@ def train(train_loader, model, criterion, optimizer, total_batch, current_epoch,
 		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
-		sample_count += y.size(0)
-		correct_count += torch.sum(torch.all(torch.eq(y, y_hat.argmax(1)), dim=1)).item()
-		if current_batch % 20 == 0:
+		if current_batch % 40 == 0:
 			logging.info('Epoch %d batch %d/%d', current_epoch, current_batch, total_batch)
 			show_sample_result(x, y, y_hat, itos_x, itos_y)
-			logging.info('Cumulative accuracy %.2f%%', 100 * correct_count / sample_count)
+			sample_count = y.size(0)
+			correct_count = torch.sum(torch.all(torch.eq(y, y_hat.argmax(1)), dim=1)).item()
+			logging.info('Accuracy %.2f%%', 100 * correct_count / sample_count)
 	logging.info('Epoch %d train total loss %f', current_epoch, total_loss)
 
 def test(test_loader, model, criterion, current_epoch, itos_x, itos_y):
