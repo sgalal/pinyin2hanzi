@@ -19,13 +19,14 @@ state = torch.load(CONFIG.MODEL_PATH)
 model.load_state_dict(state['state_dict'])
 
 try:
-	while True:
-		s = input('> ')
-		s = stoi_x(s)
-		x = torch.tensor([s])
-		y = model(x)
-		y = y[0].argmax(0).tolist()
-		y = itos_y(y)
-		print(y)
+	with torch.no_grad():
+		while True:
+			s = input('> ')
+			s = stoi_x(s)
+			x = torch.tensor([s])
+			y = model(x)
+			y = y[0].argmax(0).tolist()
+			y = itos_y(y)
+			print(y)
 except EOFError:
 	pass
