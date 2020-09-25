@@ -8,7 +8,7 @@ import config as CONFIG
 from dataset import SentenceDataset
 from itos import Itos
 from model import Model
-from utils import init_weights, randrange
+from utils import randrange
 
 # Initialize
 
@@ -30,7 +30,7 @@ itos_y = Itos('data/vocab_y.txt')
 x_vocab_size = itos_x.vocab_size()
 y_vocab_size = itos_y.vocab_size()
 
-model = Model(x_vocab_size, CONFIG.EMB_DIM, CONFIG.HIDDEN_DIM, y_vocab_size, CONFIG.N_LAYERS).to(device)
+model = Model(x_vocab_size, CONFIG.EMB_SIZE, CONFIG.HIDDEN_SIZE, y_vocab_size, CONFIG.NUM_LAYERS, CONFIG.DROPOUT).to(device)
 criterion = nn.NLLLoss()
 optimizer = optim.Adam(model.parameters(), lr=CONFIG.LR)
 
@@ -40,7 +40,7 @@ if not os.path.exists(CONFIG.MODEL_PATH):
 	current_epoch = 0
 	torch.manual_seed(42)
 	torch.cuda.manual_seed(42)
-	model.apply(init_weights)
+	model.init_weights()
 else:
 	state = torch.load(CONFIG.MODEL_PATH, map_location='cpu')
 	current_epoch = state['epoch']
