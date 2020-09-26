@@ -1,3 +1,4 @@
+from glob import glob
 import torch
 
 import config as CONFIG
@@ -13,7 +14,7 @@ itos_y = Itos('data/vocab_y.txt')
 x_vocab_size = stoi_x.vocab_size()
 y_vocab_size = itos_y.vocab_size()
 
-model = Model.load_from_checkpoint('lightning_logs/version_0/checkpoints/epoch=0.ckpt', map_location='cpu')
+model = Model.load_from_checkpoint(next(iter(glob('lightning_logs/version_0/checkpoints/*.ckpt'))), map_location='cpu')
 
 try:
 	with torch.no_grad():
