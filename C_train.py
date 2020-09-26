@@ -32,6 +32,6 @@ y_vocab_size = itos_y.vocab_size()
 
 model = Model(x_vocab_size, CONFIG.emb_size, CONFIG.hidden_size, y_vocab_size, CONFIG.num_layers, CONFIG.dropout)
 
-trainer = pl.Trainer(gpus=1, fast_dev_run=True)
+trainer = pl.Trainer(gpus=1)
 trainer.fit(model, train_loader, val_loader)
 trainer.test(test_dataloaders=test_loader)

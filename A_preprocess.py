@@ -12,10 +12,6 @@ def has_number(s):
 	'''
 	return any(c.isdigit() for c in s)
 
-def get_line_count(path):
-	with open(path) as f:
-		return sum(1 for _ in f)
-
 def remove_tones_and_spaces(s):
 	'''
 	>>> remove_tones_and_spaces('cin1 ngaa5')
@@ -24,9 +20,6 @@ def remove_tones_and_spaces(s):
 	for c in '123456 ':
 		s = s.replace(c, '')
 	return s
-
-lines_total = get_line_count('data/corpus.txt')
-lines_set = int(lines_total * 0.8)
 
 def process_jyutping_list(xs):
 	res = []
