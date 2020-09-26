@@ -1,6 +1,7 @@
 __pycache__
 .mypy_cache
 .vscode
+/lightning_logs
 
 /venv
 

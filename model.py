@@ -1,24 +1,41 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+import pytorch_lightning as pl
 
-class Model(nn.Module):
+import config as CONFIG
+
+class Model(pl.LightningModule):
 	def __init__(self, input_size, emb_size, hidden_size, output_dim, num_layers, dropout):
 		super().__init__()
 		self.embedding = nn.Embedding(input_size, emb_size)
 		self.rnn = nn.LSTM(emb_size, hidden_size, num_layers=num_layers, batch_first=True, dropout=dropout, bidirectional=True)
 		self.hidden2out = nn.Linear(hidden_size * 2, output_dim)
-		self.softmax = nn.LogSoftmax(dim=-1)
 
-	def forward(self, src):
-		output = self.embedding(src)
-		output, (hidden, cell) = self.rnn(output)
-		output = self.hidden2out(output)
-		output = self.softmax(output)
-		output = output.permute(0, 2, 1)
-		return output
+	def forward(self, x):
+		x = self.embedding(x)
+		x, (hidden, cell) = self.rnn(x)
+		x = self.hidden2out(x)
+		x = F.log_softmax(x, dim=-1)
+		x = x.permute(0, 2, 1)
+		return x
 
-	def init_weights(self):
-		def inner(model: nn.Module):
-			for param in model.parameters():
-				nn.init.uniform_(param.data, -0.08, 0.08)
-		self.apply(inner)
+	def configure_optimizers(self):
+		optimizer = torch.optim.Adam(self.parameters(), lr=CONFIG.LEARNING_RATE)
+		return optimizer
+
+	def training_step(self, batch, batch_idx):
+		x, y = batch
+		y_hat = self(x)
+		loss = F.nll_loss(y_hat, y)
+		result = pl.TrainResult(loss)
+		result.log('train_loss', loss, prog_bar=True)
+		return loss
+
+	def validation_step(self, batch, batch_idx):
+		x, y = batch
+		y_hat = self(x)
+		loss = F.cross_entropy(y_hat, y)
+		result = pl.EvalResult(checkpoint_on=loss)
+		result.log('val_loss', loss, prog_bar=True)
+		return result
