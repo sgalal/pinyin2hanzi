@@ -5,12 +5,10 @@ import pytorch_lightning as pl
 
 import config as CONFIG
 
-def calc_accuracies(y_hat: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-	return torch.all(torch.eq(y_hat.argmax(1), y), dim=1)
-
 class Model(pl.LightningModule):
 	def __init__(self, input_size, emb_size, hidden_size, output_dim, num_layers, dropout):
 		super().__init__()
+		self.save_hyperparameters()
 		self.embedding = nn.Embedding(input_size, emb_size)
 		self.rnn = nn.LSTM(emb_size, hidden_size, num_layers=num_layers, batch_first=True, dropout=dropout, bidirectional=True)
 		self.hidden2out = nn.Linear(hidden_size * 2, output_dim)
@@ -30,24 +28,20 @@ class Model(pl.LightningModule):
 	def training_step(self, batch, batch_idx):
 		x, y = batch
 		y_hat = self(x)
+		acc = torch.true_divide(torch.sum(torch.all(torch.eq(y_hat.argmax(1), y), dim=1)), y.size(0))
 		loss = F.nll_loss(y_hat, y)
 		result = pl.TrainResult(minimize=loss)
-		result.log('train_loss', loss)
+		result.log_dict({'train_acc': acc, 'train_loss': loss})
 		return loss
 
 	def validation_step(self, batch, batch_idx):
 		x, y = batch
 		y_hat = self(x)
+		acc = torch.true_divide(torch.sum(torch.all(torch.eq(y_hat.argmax(1), y), dim=1)), y.size(0))
 		loss = F.cross_entropy(y_hat, y)
 		result = pl.EvalResult(checkpoint_on=loss)
-		result.log('val_loss', loss)
+		result.log_dict({'val_acc': acc, 'val_loss': loss})
 		return result
-
-
-	def validation_epoch_end(self, val_step_outputs):
-		all_accuracies = val_step_outputs.accuracies
-		print(all_accuracies.double().mean().item())
-		return val_step_outputs
 
 	def test_step(self, batch, batch_idx):
 		x, y = batch
