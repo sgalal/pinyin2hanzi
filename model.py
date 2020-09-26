@@ -5,6 +5,9 @@ import pytorch_lightning as pl
 
 import config as CONFIG
 
+def calc_accuracies(y_hat: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+	return torch.all(torch.eq(y_hat.argmax(1), y), dim=1)
+
 class Model(pl.LightningModule):
 	def __init__(self, input_size, emb_size, hidden_size, output_dim, num_layers, dropout):
 		super().__init__()
@@ -28,8 +31,8 @@ class Model(pl.LightningModule):
 		x, y = batch
 		y_hat = self(x)
 		loss = F.nll_loss(y_hat, y)
-		result = pl.TrainResult(loss)
-		result.log('train_loss', loss, prog_bar=True)
+		result = pl.TrainResult(minimize=loss)
+		result.log('train_loss', loss)
 		return loss
 
 	def validation_step(self, batch, batch_idx):
@@ -37,8 +40,14 @@ class Model(pl.LightningModule):
 		y_hat = self(x)
 		loss = F.cross_entropy(y_hat, y)
 		result = pl.EvalResult(checkpoint_on=loss)
-		result.log('val_loss', loss, prog_bar=True)
+		result.log('val_loss', loss)
 		return result
+
+
+	def validation_epoch_end(self, val_step_outputs):
+		all_accuracies = val_step_outputs.accuracies
+		print(all_accuracies.double().mean().item())
+		return val_step_outputs
 
 	def test_step(self, batch, batch_idx):
 		x, y = batch
