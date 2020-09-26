@@ -23,15 +23,15 @@ python D_predict.py
 
 数据预处理步骤文件为 `A_preprocess.py`。
 
-输入为 `corpus.txt`，输出为 `train_x.txt`, `train_y.txt`, `test_x.txt`, `test_y.txt`（注：所有输入输出均在 `data` 目录下，下同）。
+输入为 `corpus.txt`，输出为 `x.txt`, `y.txt`（注：所有输入输出均在 `data` 目录下，下同）。
 
 输入 `corpus.txt` 的格式为：每行是一个句子，句子只可能出现汉字、字母或数字（尚未实现数字注音功能，所以数字会在后续步骤中去除）。其中，汉字既可以是繁体字，也可以是简体字，但不要混合。
 
 将输入的句子按 8:2 分为训练集和测试集，然后分别标注拼音。如果该句含有数字，则忽略该句，继续处理。然后将汉字与拼音对齐，拼音长度大于 1 时，汉字左侧填充 `-` 符号。
 
-将训练集的拼音存储为 `train_x.txt`，训练集的汉字（已与拼音对齐，下同）存储为 `train_y.txt`，测试集的拼音存储为 `test_x.txt`，测试集的汉字存储为 `test_y.txt`。
+将拼音存储为 `x.txt`，汉字（已与拼音对齐，下同）存储为 `y.txt`。
 
-标注拼音时，如果全拼音长度大于 52（`PAD_TO` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子。
+标注拼音时，如果全拼音长度大于 52（`pad_to` 为 54，减去 `<sos>` 与 `<eos>` 两个 token 得 52），则舍弃该句子。
 
 例如，输入句子为：
 
@@ -50,9 +50,9 @@ deoifongjaugingneikengauwanmaa
 
 数据预处理步骤文件为 `B_tokenize.py`。
 
-输入为 `train_x.txt`, `test_x.txt`，输出为 `vocab_x.txt`, `tokens_train_x.pth`, `tokens_test_x.pth`。
+输入为 `x.txt`，输出为 `vocab_x.txt`, `tokens_x.pth`。
 
-输入为 `train_y.txt`, `test_y.txt`，输出为 `vocab_y.txt`, `tokens_train_y.pth`, `tokens_test_y.pth`。
+输入为 `y.txt`，输出为 `vocab_y.txt`, `tokens_y.pth`。
 
 tokenize 时使用 char-level tokenization，即根据训练集的单字建立词表，将训练集和测试集的单字映射为正整数。
 
@@ -60,7 +60,7 @@ tokenize 时使用 char-level tokenization，即根据训练集的单字建立�
 
 `vocab_x.txt` 及 `vocab_y.txt` 每行是一个字符，第一行代表第四个 token，第二行代表第五个 token，依此类推。
 
-`tokens_train_x.pth`, `tokens_test_x.pth`, `tokens_train_y.pth`, `tokens_test_y.pth` 都是二维的 tensor，其中低维的长度为 54（`PAD_TO` 的值）。
+`tokens_x.pth`, `tokens_y.pth` 都是二维的 tensor，其中低维的长度为 54（`pad_to` 的值）。
 
 ### 训练
 

@@ -26,7 +26,7 @@ def remove_tones_and_spaces(s):
 	return s
 
 lines_total = get_line_count('data/corpus.txt')
-lines_train_set = int(lines_total * 0.8)
+lines_set = int(lines_total * 0.8)
 
 def process_jyutping_list(xs):
 	res = []
@@ -46,7 +46,7 @@ def process_jyutping_list(xs):
 	xxs = ''.join(xxs)
 	yys = ''.join(yys)
 
-	if len(yys) > CONFIG.PAD_TO - 2:
+	if len(yys) > CONFIG.pad_to - 2:
 		return res
 
 	res.append((xxs, yys))
@@ -54,20 +54,11 @@ def process_jyutping_list(xs):
 	return res
 
 with open('data/corpus.txt') as f, \
-open('data/train_x.txt', 'w') as train_file_x, \
-open('data/train_y.txt', 'w') as train_file_y, \
-open('data/test_x.txt', 'w') as test_file_x, \
-open('data/test_y.txt', 'w') as test_file_y:
+open('data/x.txt', 'w') as file_x, \
+open('data/y.txt', 'w') as file_y:
 	for i, line in enumerate(f):
 		if has_number(line):
 			continue
-
-		if i < lines_train_set:
-			file_x = train_file_x
-			file_y = train_file_y
-		else:
-			file_x = test_file_x
-			file_y = test_file_y
 
 		for xxs, yys in process_jyutping_list(ToJyutping.get_jyutping_list(line.rstrip('\n'))):
 			print(xxs, file=file_x)

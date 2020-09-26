@@ -1,12 +1,9 @@
-PAD_TO = 54  # maximum number of tokens in a sentence
+pad_to = 54  # maximum number of tokens in a sentence
 
-EMB_SIZE = 128
-HIDDEN_SIZE = 512
-NUM_LAYERS = 2
-DROPOUT = 0.1
+emb_size = 128
+hidden_size = 512
+num_layers = 2
+dropout = 0.1
 
-BATCH_SIZE = 600
-TOTAL_EPOCH = 16
-LEARNING_RATE = 1e-3
-
-MODEL_PATH = 'data/model.pth'
+batch_size = 1400
+learning_rate = 1e-3

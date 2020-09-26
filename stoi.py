@@ -13,12 +13,12 @@ class Stoi:
 			self.data = {ord(line[0]): i for i, line in enumerate(f, start=4)}
 
 	def __call__(self, s):
-		assert len(s) <= CONFIG.PAD_TO - 2, 'Sequence is too long'
+		assert len(s) <= CONFIG.pad_to - 2, 'Sequence is too long'
 		def inner():
 			yield self.TOK_SOS
 			yield from (self.data.get(ord(c), self.TOK_UNK) for c in s)
 			yield self.TOK_EOS
-			yield from repeat(self.TOK_PAD, CONFIG.PAD_TO - 2 - len(s))
+			yield from repeat(self.TOK_PAD, CONFIG.pad_to - 2 - len(s))
 		return list(inner())
 
 	def vocab_size(self):

@@ -21,7 +21,7 @@ class Model(pl.LightningModule):
 		return x
 
 	def configure_optimizers(self):
-		optimizer = torch.optim.Adam(self.parameters(), lr=CONFIG.LEARNING_RATE)
+		optimizer = torch.optim.Adam(self.parameters(), lr=CONFIG.learning_rate)
 		return optimizer
 
 	def training_step(self, batch, batch_idx):
@@ -38,4 +38,12 @@ class Model(pl.LightningModule):
 		loss = F.cross_entropy(y_hat, y)
 		result = pl.EvalResult(checkpoint_on=loss)
 		result.log('val_loss', loss, prog_bar=True)
+		return result
+
+	def test_step(self, batch, batch_idx):
+		x, y = batch
+		y_hat = self(x)
+		loss = F.cross_entropy(y_hat, y)
+		result = pl.EvalResult()
+		result.log('test_loss', loss)
 		return result
