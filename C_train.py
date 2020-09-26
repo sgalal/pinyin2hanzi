@@ -14,8 +14,8 @@ torch.backends.cudnn.deterministic = True
 train_set = SentenceDataset(train=True)
 val_set = SentenceDataset(train=False)
 
-train_loader = DataLoader(train_set, batch_size=CONFIG.BATCH_SIZE, num_workers=4, shuffle=True, pin_memory=True)
-val_loader = DataLoader(val_set, batch_size=CONFIG.BATCH_SIZE, num_workers=4, shuffle=False, pin_memory=True)
+train_loader = DataLoader(train_set, batch_size=CONFIG.BATCH_SIZE, shuffle=True, pin_memory=True)
+val_loader = DataLoader(val_set, batch_size=CONFIG.BATCH_SIZE, shuffle=False, pin_memory=True)
 
 total_batch = len(train_loader)
 
